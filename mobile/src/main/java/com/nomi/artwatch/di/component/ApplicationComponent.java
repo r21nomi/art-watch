@@ -2,6 +2,7 @@ package com.nomi.artwatch.di.component;
 
 import com.nomi.artwatch.Application;
 import com.nomi.artwatch.di.module.ApplicationModule;
+import com.nomi.artwatch.model.PostModel;
 import com.nomi.artwatch.model.UserModel;
 
 import javax.inject.Singleton;
@@ -19,4 +20,5 @@ public interface ApplicationComponent {
     void inject(Application application);
 
     UserModel userModel();
+    PostModel postModel();
 }

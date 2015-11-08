@@ -10,6 +10,13 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by Ryota Niinomi on 15/10/13.
@@ -31,9 +38,35 @@ public class GifView extends View {
 
     public GifView(Context context, AttributeSet attrs, int defStyle) throws IOException {
         super(context, attrs, defStyle);
-        mMovie = Movie.decodeStream(getResources().getAssets().open("image_1.gif"));
+//        mMovie = Movie.decodeStream(getResources().getAssets().open("image_1.gif"));
 
         setViewAttributes();
+    }
+
+    public void setGif(String originUrl) {
+        Observable
+                .just(null)
+                .subscribeOn(Schedulers.io())
+                .doOnNext(aVoid -> {
+                    try {
+                        URL url = new URL(originUrl);
+                        mMovie = Movie.decodeStream(url.openConnection().getInputStream());
+
+                    } catch (MalformedURLException e) {
+                        Timber.w(e, e.getLocalizedMessage());
+
+                    } catch (IOException e) {
+                        Timber.w(e, e.getLocalizedMessage());
+                    }
+                })
+                .doOnError(throwable -> {
+                    Timber.w(throwable, throwable.getLocalizedMessage());
+
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(proto -> {
+                    invalidateView();
+                });
     }
 
     @Override
@@ -43,9 +76,11 @@ public class GifView extends View {
         Paint p = new Paint();
         p.setAntiAlias(true);
 
-        updateAnimationTime();
-        drawMovieFrame(canvas);
-        invalidateView();
+        if (mMovie != null) {
+            updateAnimationTime();
+            drawMovieFrame(canvas);
+            invalidateView();
+        }
     }
 
     private void updateAnimationTime() {

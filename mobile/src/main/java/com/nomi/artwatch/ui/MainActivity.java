@@ -17,12 +17,17 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 import com.nomi.artwatch.R;
 import com.nomi.artwatch.di.component.ActivityComponent;
+import com.nomi.artwatch.model.PostModel;
 import com.nomi.artwatch.model.UserModel;
+import com.nomi.artwatch.ui.view.ArtView;
 
 import javax.inject.Inject;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.android.schedulers.AndroidSchedulers;
+import timber.log.Timber;
 
 /**
  * Created by Ryota Niinomi on 2015/11/04.
@@ -41,6 +46,13 @@ public class MainActivity extends InjectActivity implements
 
     @Inject
     UserModel mUserModel;
+    @Inject
+    PostModel mPostModel;
+
+    @Bind(R.id.artView)
+    ArtView mArtView;
+    @Bind(R.id.gif)
+    GifView gifImageView;
 
     @Override
     protected void injectDependency(ActivityComponent component) {
@@ -63,11 +75,15 @@ public class MainActivity extends InjectActivity implements
                 .addApi(Wearable.API)
                 .build();
 
-        mUserModel
-                .getUser()
-                .subscribe(user -> {
-                    user.getName();
-                    user.getBlogs();
+        mPostModel
+                .getPhotoPost("ryotaniinomi")
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    mArtView.init(result);
+//                    gifImageView.setGif("https://49.media.tumblr.com/4697092aaddaac4f70fa56d415b27cf9/tumblr_nv9mpn23Gp1rt67t1o1_400.gif");
+
+                }, throwable -> {
+                    Timber.w(throwable, throwable.getLocalizedMessage());
                 });
     }
 
