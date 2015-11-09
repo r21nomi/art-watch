@@ -22,6 +22,8 @@ import timber.log.Timber;
 @Singleton
 public class PostModel extends BaseModel {
 
+    private static final int LIMIT = 40;
+
     @Inject
     public PostModel() {
 
@@ -96,12 +98,8 @@ public class PostModel extends BaseModel {
                 .forEach(item -> {
                     Observable
                             .from(item.getPhotos())
-                            .filter(item2 -> photos.size() < 10 && isGif(item2))
+                            .filter(item2 -> photos.size() < LIMIT && isGif(item2))
                             .forEach(item3 -> {
-//                                String url = item2.getOriginalSize().getUrl();
-//                                byte[] byteUrl = ByteArrayHttpClient.get(url);
-//                                item2.setByteUrl(byteUrl);
-
                                 Timber.d("photo url : " + item3.getOriginalSize().getUrl());
                                 photos.add(item3);
                             });

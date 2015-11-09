@@ -38,7 +38,7 @@ public class ArtView extends RecyclerView {
         ArtBinder artBinder = new ArtBinder(mAdapter, photos);
 
         mAdapter.clearBinderList();
-        mAdapter.addAllBinder(artBinder, artBinder);
+        mAdapter.addAllBinder(artBinder);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);

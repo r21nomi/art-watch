@@ -51,8 +51,6 @@ public class MainActivity extends InjectActivity implements
 
     @Bind(R.id.artView)
     ArtView mArtView;
-    @Bind(R.id.gif)
-    GifView gifImageView;
 
     @Override
     protected void injectDependency(ActivityComponent component) {
@@ -78,11 +76,7 @@ public class MainActivity extends InjectActivity implements
         mPostModel
                 .getPhotoPost("ryotaniinomi")
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> {
-                    mArtView.init(result);
-//                    gifImageView.setGif("https://49.media.tumblr.com/4697092aaddaac4f70fa56d415b27cf9/tumblr_nv9mpn23Gp1rt67t1o1_400.gif");
-
-                }, throwable -> {
+                .subscribe(mArtView::init, throwable -> {
                     Timber.w(throwable, throwable.getLocalizedMessage());
                 });
     }

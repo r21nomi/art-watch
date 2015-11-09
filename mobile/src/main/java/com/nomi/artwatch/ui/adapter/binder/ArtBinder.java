@@ -10,6 +10,7 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.nomi.artwatch.R;
+import com.nomi.artwatch.util.WindowUtil;
 import com.tumblr.jumblr.types.Photo;
 import com.tumblr.jumblr.types.PhotoSize;
 import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBindAdapter;
@@ -44,15 +45,6 @@ public class ArtBinder extends DataBinder<ArtBinder.ViewHolder> {
     @Override
     public void bindViewHolder(ViewHolder holder, int position) {
         PhotoSize photoSize = mDataSet.get(position).getOriginalSize();
-//        holder.mGifView.setGif(photoSize.getUrl());
-
-//        holder.mGifView.setBytes(mDataSet.get(position).getByteUrl());
-//
-//        if (!holder.mGifView.isAnimating()) {
-//            holder.mGifView.startAnimation();
-//        }
-
-//        holder.mMyGifView.setUrl(photoSize.getUrl());
 
         Glide.with(holder.mGifView.getContext())
                 .load(photoSize.getUrl())
@@ -60,15 +52,17 @@ public class ArtBinder extends DataBinder<ArtBinder.ViewHolder> {
                 .into(new SimpleTarget<GifDrawable>() {
                     @Override
                     public void onResourceReady(GifDrawable resource, GlideAnimation<? super GifDrawable> glideAnimation) {
-//                        holder.mGifView3.setBytes(resource.getData());
-//                        if (!holder.mGifView3.isAnimating()) {
-//                            holder.mGifView3.startAnimation();
-//                        }
+                        int width = WindowUtil.getWidth(holder.mGifView.getContext());
+                        int height = width * resource.getIntrinsicHeight() / resource.getIntrinsicWidth();
+
+                        ViewGroup.LayoutParams params = holder.mGifView.getLayoutParams();
+                        params.width = width;
+                        params.height = height;
                         holder.mGifView.setBackground(resource);
+
                         resource.start();
                     }
                 });
-//        holder.mGifView.startAnimation();
     }
 
     @Override
