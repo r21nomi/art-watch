@@ -31,7 +31,7 @@ public class GIFView2 extends View {
 
     public GIFView2(Context context, AttributeSet attrs, int defStyle) throws IOException {
         super(context, attrs, defStyle);
-        mMovie = Movie.decodeStream(getResources().getAssets().open("image_1.gif"));
+        mMovie = Movie.decodeStream(getResources().getAssets().open("image_2.gif"));
 
         setViewAttributes();
     }

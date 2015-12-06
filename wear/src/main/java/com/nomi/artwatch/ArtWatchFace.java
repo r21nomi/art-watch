@@ -131,7 +131,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
             mGifImageView = (GifImageView)inflater.inflate(R.layout.gif_view, null).findViewById(R.id.gifView);
             mGifImageView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            mGifImageView.setImageResource(R.drawable.image_1);
+            mGifImageView.setImageResource(R.drawable.image_2);
         }
 
         @Override

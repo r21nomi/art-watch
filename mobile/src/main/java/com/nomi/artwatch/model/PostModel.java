@@ -25,8 +25,8 @@ public class PostModel extends BaseModel {
     private static final int LIMIT = 40;
 
     @Inject
-    public PostModel() {
-
+    public PostModel(PrefModel prefModel) {
+        super(prefModel);
     }
 
     public Observable<Blog> getBlog(String blogName) {

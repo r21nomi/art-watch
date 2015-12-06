@@ -1,11 +1,10 @@
-package com.nomi.artwatch.ui;
+package com.nomi.artwatch.ui.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.wearable.companion.WatchFaceCompanion;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -17,6 +16,7 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 import com.nomi.artwatch.R;
 import com.nomi.artwatch.di.component.ActivityComponent;
+import com.nomi.artwatch.model.LoginModel;
 import com.nomi.artwatch.model.PostModel;
 import com.nomi.artwatch.model.UserModel;
 import com.nomi.artwatch.ui.view.ArtView;
@@ -32,7 +32,7 @@ import timber.log.Timber;
 /**
  * Created by Ryota Niinomi on 2015/11/04.
  */
-public class MainActivity extends InjectActivity implements
+public class MainActivity extends DrawerActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         ResultCallback<DataApi.DataItemResult> {
@@ -40,7 +40,6 @@ public class MainActivity extends InjectActivity implements
     private static final String KEY_COLOR = "COLOR";
     private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
 
-    private CharSequence mTitle;
     private GoogleApiClient mGoogleApiClient;
     private String mPeerId;
 
@@ -48,9 +47,15 @@ public class MainActivity extends InjectActivity implements
     UserModel mUserModel;
     @Inject
     PostModel mPostModel;
+    @Inject
+    LoginModel mLoginModel;
 
     @Bind(R.id.artView)
     ArtView mArtView;
+
+    protected int getLayout() {
+        return R.layout.activity_main;
+    }
 
     @Override
     protected void injectDependency(ActivityComponent component) {
@@ -60,11 +65,8 @@ public class MainActivity extends InjectActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
-
-        mTitle = getTitle();
 
         mPeerId = getIntent().getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -73,6 +75,25 @@ public class MainActivity extends InjectActivity implements
                 .addApi(Wearable.API)
                 .build();
 
+
+        if (mLoginModel.isAuthorized()) {
+            fetchGifPosts();
+
+        } else {
+            mLoginModel
+                    .login()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(authUrl -> {
+                        Timber.d("Auth URL : " + authUrl);
+                        startActivity(new Intent("android.intent.action.VIEW", Uri.parse(authUrl)));
+
+                    }, throwable -> {
+                        Timber.w(throwable, throwable.getLocalizedMessage());
+                    });
+        }
+    }
+
+    private void fetchGifPosts() {
         mPostModel
                 .getPhotoPost("ryotaniinomi")
                 .observeOn(AndroidSchedulers.mainThread())
@@ -154,25 +175,5 @@ public class MainActivity extends InjectActivity implements
                 break;
             }
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

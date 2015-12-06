@@ -15,7 +15,7 @@ public class Config {
     public static void init(Context context) {
         CONSUMER_KEY = context.getString(R.string.consumer_key);
         CONSUMER_SECRET = context.getString(R.string.consumer_secret);
-        OAUTH_TOKEN = context.getString(R.string.oauth_token);
-        OAUTH_TOKEN_SECRET = context.getString(R.string.oauth_token_secret);
+//        OAUTH_TOKEN = context.getString(R.string.oauth_token);
+//        OAUTH_TOKEN_SECRET = context.getString(R.string.oauth_token_secret);
     }
 }

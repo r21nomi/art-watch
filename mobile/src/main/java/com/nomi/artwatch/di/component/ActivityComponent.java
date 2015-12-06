@@ -2,7 +2,7 @@ package com.nomi.artwatch.di.component;
 
 import com.nomi.artwatch.di.ActivityScope;
 import com.nomi.artwatch.di.module.ActivityModule;
-import com.nomi.artwatch.ui.MainActivity;
+import com.nomi.artwatch.ui.activity.MainActivity;
 
 import dagger.Component;
 

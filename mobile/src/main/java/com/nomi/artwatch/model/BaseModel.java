@@ -8,13 +8,15 @@ import com.tumblr.jumblr.JumblrClient;
  */
 public class BaseModel {
 
-    public BaseModel() {
+    protected PrefModel mPrefModel;
 
+    public BaseModel(PrefModel prefModel) {
+        mPrefModel = prefModel;
     }
 
     protected JumblrClient getClient() {
         JumblrClient client = new JumblrClient(Config.CONSUMER_KEY, Config.CONSUMER_SECRET);
-        client.setToken(Config.OAUTH_TOKEN, Config.OAUTH_TOKEN_SECRET);
+        client.setToken(mPrefModel.getToken(), mPrefModel.getTokenSecret());
 
         return client;
     }

@@ -21,8 +21,8 @@ import timber.log.Timber;
 public class UserModel extends BaseModel {
 
     @Inject
-    public UserModel() {
-
+    public UserModel(PrefModel prefModel) {
+        super(prefModel);
     }
 
     public Observable<User> getUser() {

@@ -1,4 +1,4 @@
-package com.nomi.artwatch.ui;
+package com.nomi.artwatch.ui.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
