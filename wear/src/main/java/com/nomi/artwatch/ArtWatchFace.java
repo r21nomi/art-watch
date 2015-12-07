@@ -34,6 +34,9 @@ import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.View;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.DataApi;
@@ -360,15 +363,39 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         }
 
         private void setDefaultValuesForMissingConfigKeys(DataMap config) {
-            addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_COLOR,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
+//            addIntKeyIfMissing(config, DigitalWatchFaceUtil.KEY_COLOR,
+//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
+
+            addStringKeyIfMissing(config, DigitalWatchFaceUtil.KEY_GIF_URL, "");
         }
 
-        private void addIntKeyIfMissing(DataMap config, String key, int color) {
+//        private void addIntKeyIfMissing(DataMap config, String key, int color) {
+//            if (!config.containsKey(key)) {
+//                config.putInt(key, color);
+//            }
+//        }
+
+        private void addStringKeyIfMissing(DataMap config, String key, String url) {
             if (!config.containsKey(key)) {
-                config.putInt(key, color);
+                config.putString(key, url);
             }
         }
+
+//        private void updateUiForConfigDataMap(final DataMap config) {
+//            boolean uiUpdated = false;
+//            for (String configKey : config.keySet()) {
+//                if (!config.containsKey(configKey)) {
+//                    continue;
+//                }
+//                int color = config.getInt(configKey);
+//                if (updateUiForKey(configKey, color)) {
+//                    uiUpdated = true;
+//                }
+//            }
+//            if (uiUpdated) {
+//                invalidate();
+//            }
+//        }
 
         private void updateUiForConfigDataMap(final DataMap config) {
             boolean uiUpdated = false;
@@ -376,8 +403,8 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 if (!config.containsKey(configKey)) {
                     continue;
                 }
-                int color = config.getInt(configKey);
-                if (updateUiForKey(configKey, color)) {
+                String url = config.getString(configKey);
+                if (updateUiForKey(configKey, url)) {
                     uiUpdated = true;
                 }
             }
@@ -386,9 +413,37 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             }
         }
 
-        private boolean updateUiForKey(String configKey, int color) {
+//        private boolean updateUiForKey(String configKey, int color) {
+//            if (configKey.equals(DigitalWatchFaceUtil.KEY_COLOR)) {
+//                setInteractiveBackgroundColor(color);
+//            } else {
+//                return false;
+//            }
+//            return true;
+//        }
+
+        private boolean updateUiForKey(String configKey, String url) {
             if (configKey.equals(DigitalWatchFaceUtil.KEY_COLOR)) {
-                setInteractiveBackgroundColor(color);
+//                setInteractiveBackgroundColor(url);
+                Glide.with(mGifImageView.getContext())
+                        .load(url)
+                        .asGif()
+                        .into(new SimpleTarget<com.bumptech.glide.load.resource.gif.GifDrawable>() {
+                            @Override
+                            public void onResourceReady(com.bumptech.glide.load.resource.gif.GifDrawable resource,
+                                                        GlideAnimation<? super com.bumptech.glide.load.resource.gif.GifDrawable> glideAnimation) {
+//                                int width = WindowUtil.getWidth(holder.mGifView.getContext());
+//                                int height = width * resource.getIntrinsicHeight() / resource.getIntrinsicWidth();
+//
+//                                ViewGroup.LayoutParams params = holder.mGifView.getLayoutParams();
+//                                params.width = width;
+//                                params.height = height;
+                                mGifImageView.setBackground(resource);
+
+                                resource.start();
+                            }
+                        });
+
             } else {
                 return false;
             }

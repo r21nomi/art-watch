@@ -39,6 +39,8 @@ public final class DigitalWatchFaceUtil {
      */
     public static final String KEY_COLOR = "COLOR";
 
+    public static final String KEY_GIF_URL = "gif_url";
+
     /**
      * The {@link DataMap} key for {@link DigitalWatchFaceService} hour digits color name.
      * The color name must be a {@link String} recognized by {@link Color#parseColor}.

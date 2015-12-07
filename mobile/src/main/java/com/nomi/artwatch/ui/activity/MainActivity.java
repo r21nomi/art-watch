@@ -38,6 +38,7 @@ public class MainActivity extends DrawerActivity implements
         ResultCallback<DataApi.DataItemResult> {
 
     private static final String KEY_COLOR = "COLOR";
+    private static final String KEY_GIF_URL = "gif_url";
     private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
 
     private GoogleApiClient mGoogleApiClient;
@@ -93,15 +94,6 @@ public class MainActivity extends DrawerActivity implements
         }
     }
 
-    private void fetchGifPosts() {
-        mPostModel
-                .getPhotoPost("ryotaniinomi")
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mArtView::init, throwable -> {
-                    Timber.w(throwable, throwable.getLocalizedMessage());
-                });
-    }
-
     @Override
     public void onConnected(Bundle connectionHint) {
         if (mPeerId != null) {
@@ -145,6 +137,27 @@ public class MainActivity extends DrawerActivity implements
     @OnClick(R.id.btn2)
     void onBtn2Click() {
         sendConfigUpdateMessage(Color.parseColor("Blue"));
+    }
+
+    private void fetchGifPosts() {
+        mPostModel
+                .getPhotoPost("ryotaniinomi")
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(items -> {
+                    mArtView.init(items, this::onGifSelected);
+
+                }, throwable -> {
+                    Timber.w(throwable, throwable.getLocalizedMessage());
+                });
+    }
+
+    private void onGifSelected(String url) {
+        if (mPeerId != null) {
+            DataMap config = new DataMap();
+            config.putString(KEY_GIF_URL, url);
+            byte[] rawData = config.toByteArray();
+            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, PATH_WITH_FEATURE, rawData);
+        }
     }
 
     private void sendConfigUpdateMessage(int color) {

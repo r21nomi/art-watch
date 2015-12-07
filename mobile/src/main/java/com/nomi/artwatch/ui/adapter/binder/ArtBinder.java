@@ -20,7 +20,9 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import pl.droidsonroids.gif.GifImageView;
+import rx.functions.Action1;
 
 /**
  * Created by Ryota Niinomi on 15/11/8.
@@ -28,11 +30,13 @@ import pl.droidsonroids.gif.GifImageView;
 public class ArtBinder extends DataBinder<ArtBinder.ViewHolder> {
 
     private List<Photo> mDataSet;
+    private Action1<String> mListener;
 
-    public ArtBinder(DataBindAdapter dataBindAdapter, List<Photo> dataSet) {
+    public ArtBinder(DataBindAdapter dataBindAdapter, List<Photo> dataSet, Action1<String> listener) {
         super(dataBindAdapter);
 
         mDataSet = dataSet;
+        mListener = listener;
     }
 
     @Override
@@ -45,6 +49,8 @@ public class ArtBinder extends DataBinder<ArtBinder.ViewHolder> {
     @Override
     public void bindViewHolder(ViewHolder holder, int position) {
         PhotoSize photoSize = mDataSet.get(position).getOriginalSize();
+
+        holder.mPosition = position;
 
         Glide.with(holder.mGifView.getContext())
                 .load(photoSize.getUrl())
@@ -70,7 +76,9 @@ public class ArtBinder extends DataBinder<ArtBinder.ViewHolder> {
         return mDataSet.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private int mPosition;
+
         @Bind(R.id.gifView)
         GifImageView mGifView;
 
@@ -78,6 +86,12 @@ public class ArtBinder extends DataBinder<ArtBinder.ViewHolder> {
             super(view);
 
             ButterKnife.bind(this, view);
+        }
+
+        @OnClick(R.id.gifView)
+        void onSelect() {
+            PhotoSize photoSize = mDataSet.get(mPosition).getOriginalSize();
+            mListener.call(photoSize.getUrl());
         }
     }
 }
