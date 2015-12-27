@@ -1,5 +1,7 @@
 package com.tumblr.jumblr.types;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -9,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class is the base of all post types on Tumblr

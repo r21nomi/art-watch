@@ -467,6 +467,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             }
             mRegisteredTimeZoneReceiver = true;
             IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+            filter.addAction(Intent.ACTION_LOCALE_CHANGED);
             ArtWatchFace.this.registerReceiver(mTimeZoneReceiver, filter);
         }
 

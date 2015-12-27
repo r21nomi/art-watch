@@ -14,6 +14,7 @@ import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
 import rx.Observable;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by Ryota Niinomi on 15/12/06.
@@ -41,6 +42,9 @@ public class LoginModel {
     }
 
     public boolean isAuthorized() {
+        Timber.d("token : %s", mPrefModel.getToken());
+        Timber.d("token secret : %s", mPrefModel.getTokenSecret());
+
         return StringUtil.isNotBlank(mPrefModel.getToken())
                 && StringUtil.isNotBlank(mPrefModel.getTokenSecret());
     }

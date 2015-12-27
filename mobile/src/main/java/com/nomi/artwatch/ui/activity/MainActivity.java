@@ -95,6 +95,20 @@ public class MainActivity extends DrawerActivity implements
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onStop();
+    }
+
+    @Override
     public void onConnected(Bundle connectionHint) {
         if (mPeerId != null) {
             Uri.Builder builder = new Uri.Builder();
