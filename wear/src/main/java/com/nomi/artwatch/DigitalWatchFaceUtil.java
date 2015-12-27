@@ -39,7 +39,9 @@ public final class DigitalWatchFaceUtil {
      */
     public static final String KEY_COLOR = "COLOR";
 
+    public static final String PATH_OF_GIF = "/gif";
     public static final String KEY_GIF_URL = "gif_url";
+    public static final String KEY_GIF = "gif";
 
     /**
      * The {@link DataMap} key for {@link DigitalWatchFaceService} hour digits color name.

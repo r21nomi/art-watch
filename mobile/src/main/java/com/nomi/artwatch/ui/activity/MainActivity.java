@@ -1,18 +1,26 @@
 package com.nomi.artwatch.ui.activity;
 
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.wearable.companion.WatchFaceCompanion;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.nomi.artwatch.R;
 import com.nomi.artwatch.di.component.ActivityComponent;
@@ -25,7 +33,6 @@ import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
 import timber.log.Timber;
 
@@ -37,9 +44,9 @@ public class MainActivity extends DrawerActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         ResultCallback<DataApi.DataItemResult> {
 
-    private static final String KEY_COLOR = "COLOR";
-    private static final String KEY_GIF_URL = "gif_url";
     private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
+    public static final String PATH_OF_GIF = "/gif";
+    public static final String KEY_GIF = "gif";
 
     private GoogleApiClient mGoogleApiClient;
     private String mPeerId;
@@ -76,21 +83,13 @@ public class MainActivity extends DrawerActivity implements
                 .addApi(Wearable.API)
                 .build();
 
-
         if (mLoginModel.isAuthorized()) {
+            // Already authorized.
             fetchGifPosts();
 
         } else {
-            mLoginModel
-                    .login()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(authUrl -> {
-                        Timber.d("Auth URL : " + authUrl);
-                        startActivity(new Intent("android.intent.action.VIEW", Uri.parse(authUrl)));
-
-                    }, throwable -> {
-                        Timber.w(throwable, throwable.getLocalizedMessage());
-                    });
+            // Authorize now.
+            authorize();
         }
     }
 
@@ -143,16 +142,25 @@ public class MainActivity extends DrawerActivity implements
 
     }
 
-    @OnClick(R.id.btn1)
-    void onBtn1Click() {
-        sendConfigUpdateMessage(Color.parseColor("Red"));
+    /**
+     * Authorize to Tumblr.
+     */
+    private void authorize() {
+        mLoginModel
+                .login()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(authUrl -> {
+                    Timber.d("Auth URL : " + authUrl);
+                    startActivity(new Intent("android.intent.action.VIEW", Uri.parse(authUrl)));
+
+                }, throwable -> {
+                    Timber.w(throwable, throwable.getLocalizedMessage());
+                });
     }
 
-    @OnClick(R.id.btn2)
-    void onBtn2Click() {
-        sendConfigUpdateMessage(Color.parseColor("Blue"));
-    }
-
+    /**
+     * Fetch Gif posts from Tumblr.
+     */
     private void fetchGifPosts() {
         mPostModel
                 .getPhotoPost("ryotaniinomi")
@@ -165,42 +173,69 @@ public class MainActivity extends DrawerActivity implements
                 });
     }
 
+    /**
+     * Send an request to change gif image with selected one.
+     *
+     * @param url
+     */
     private void onGifSelected(String url) {
         if (mPeerId != null) {
-            DataMap config = new DataMap();
-            config.putString(KEY_GIF_URL, url);
-            byte[] rawData = config.toByteArray();
-            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, PATH_WITH_FEATURE, rawData);
+            Glide.with(this)
+                    .load(url)
+                    .asGif()
+                    .into(new SimpleTarget<GifDrawable>() {
+                        @Override
+                        public void onResourceReady(GifDrawable resource, GlideAnimation<? super GifDrawable> glideAnimation) {
+                            // Convert GifDrawable to Asset.
+                            Asset asset = createAssetFromDrawable(resource);
+
+                            PutDataMapRequest dataMap = PutDataMapRequest.create(PATH_OF_GIF);
+                            dataMap.getDataMap().putAsset(KEY_GIF, asset);
+                            PutDataRequest request = dataMap.asPutDataRequest();
+
+                            // Send the request.
+                            Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+
+                            Toast.makeText(MainActivity.this, "changed", Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
     }
 
-    private void sendConfigUpdateMessage(int color) {
-        if (mPeerId != null) {
-            DataMap config = new DataMap();
-            config.putInt(KEY_COLOR, color);
-            byte[] rawData = config.toByteArray();
-            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, PATH_WITH_FEATURE, rawData);
-        }
+    /**
+     * Create asset for sending the gif data to wear.
+     *
+     * @param drawable
+     * @return
+     */
+    private Asset createAssetFromDrawable(GifDrawable drawable) {
+        byte[] byteArray = drawable.getData();
+        return Asset.createFromBytes(byteArray);
     }
 
+    // TODO：To be deleted.
     private void setUpAllPickers(DataMap config) {
         setUpColorPickerSelection(config);
     }
 
+    // TODO：To be deleted.
     private void setUpColorPickerSelection(DataMap config) {
-        String defaultColorName = "Black";
-        int defaultColor = Color.parseColor(defaultColorName);
-        int color;
-        if (config != null) {
-            color = config.getInt(KEY_COLOR, defaultColor);
-        } else {
-            color = defaultColor;
-        }
-        String[] colorNames = getResources().getStringArray(R.array.progress_spinner_sequence);
-        for (int i = 0; i < colorNames.length; i++) {
-            if (Color.parseColor(colorNames[i]) == color) {
-                break;
-            }
-        }
+        DataMap data = config;
+        Resources res = getResources();
+
+//        String defaultColorName = "Black";
+//        int defaultColor = Color.parseColor(defaultColorName);
+//        int color;
+//        if (config != null) {
+//            color = config.getInt(KEY_COLOR, defaultColor);
+//        } else {
+//            color = defaultColor;
+//        }
+//        String[] colorNames = getResources().getStringArray(R.array.progress_spinner_sequence);
+//        for (int i = 0; i < colorNames.length; i++) {
+//            if (Color.parseColor(colorNames[i]) == color) {
+//                break;
+//            }
+//        }
     }
 }
