@@ -22,9 +22,9 @@ import timber.log.Timber;
 @Singleton
 public class LoginModel {
 
-    private static final String REQUEST_TOKEN_URL = "http://www.tumblr.com/oauth/request_token";
-    private static final String ACCESS_TOKEN_URL = "http://www.tumblr.com/oauth/access_token";
-    private static final String AUTH_URL = "http://www.tumblr.com/oauth/authorize";
+    private static final String REQUEST_TOKEN_URL = "https://www.tumblr.com/oauth/request_token";
+    private static final String ACCESS_TOKEN_URL = "https://www.tumblr.com/oauth/access_token";
+    private static final String AUTH_URL = "https://www.tumblr.com/oauth/authorize";
     private static final String CALLBACK_URL = "artwatch://com.nomi.artwatch";
 
     private PrefModel mPrefModel;
