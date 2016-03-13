@@ -1,7 +1,6 @@
 package com.nomi.artwatch.ui.activity;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.wearable.companion.WatchFaceCompanion;
@@ -13,12 +12,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.Asset;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataItem;
-import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
@@ -39,14 +33,10 @@ import timber.log.Timber;
 /**
  * Created by Ryota Niinomi on 2015/11/04.
  */
-public class MainActivity extends DrawerActivity implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        ResultCallback<DataApi.DataItemResult> {
+public class MainActivity extends DrawerActivity {
 
-    private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
-    public static final String PATH_OF_GIF = "/gif";
-    public static final String KEY_GIF = "gif";
+    private static final String PATH_OF_GIF = "/gif";
+    private static final String KEY_GIF = "gif";
 
     private GoogleApiClient mGoogleApiClient;
     private String mPeerId;
@@ -60,6 +50,27 @@ public class MainActivity extends DrawerActivity implements
 
     @Bind(R.id.artView)
     ArtView mArtView;
+
+    private GoogleApiClient.ConnectionCallbacks mGoogleConnectionCallback = new GoogleApiClient.ConnectionCallbacks() {
+        @Override
+        public void onConnected(Bundle connectionHint) {
+            if (mPeerId != null) {
+                Timber.d("Connected to wear.");
+            }
+        }
+
+        @Override
+        public void onConnectionSuspended(int cause) {
+            // TODO：Handling
+        }
+    };
+
+    private GoogleApiClient.OnConnectionFailedListener mGoogleConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
+        @Override
+        public void onConnectionFailed(ConnectionResult connectionResult) {
+            // TODO：Error handling
+        }
+    };
 
     protected int getLayout() {
         return R.layout.activity_main;
@@ -78,8 +89,8 @@ public class MainActivity extends DrawerActivity implements
 
         mPeerId = getIntent().getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
+                .addConnectionCallbacks(mGoogleConnectionCallback)
+                .addOnConnectionFailedListener(mGoogleConnectionFailedListener)
                 .addApi(Wearable.API)
                 .build();
 
@@ -105,41 +116,6 @@ public class MainActivity extends DrawerActivity implements
             mGoogleApiClient.disconnect();
         }
         super.onStop();
-    }
-
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        if (mPeerId != null) {
-            Uri.Builder builder = new Uri.Builder();
-            Uri uri = builder.scheme("wear").path(PATH_WITH_FEATURE).authority(mPeerId).build();
-            Wearable.DataApi.getDataItem(mGoogleApiClient, uri).setResultCallback(this);
-        } else {
-//            displayNoConnectedDeviceDialog();
-        }
-    }
-
-    @Override
-    public void onResult(DataApi.DataItemResult dataItemResult) {
-        if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
-            DataItem configDataItem = dataItemResult.getDataItem();
-            DataMapItem dataMapItem = DataMapItem.fromDataItem(configDataItem);
-            DataMap config = dataMapItem.getDataMap();
-            setUpAllPickers(config);
-        } else {
-            // If DataItem with the current config can't be retrieved, select the default items on
-            // each picker.
-            setUpAllPickers(null);
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int cause) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-
     }
 
     /**
@@ -211,31 +187,5 @@ public class MainActivity extends DrawerActivity implements
     private Asset createAssetFromDrawable(GifDrawable drawable) {
         byte[] byteArray = drawable.getData();
         return Asset.createFromBytes(byteArray);
-    }
-
-    // TODO：To be deleted.
-    private void setUpAllPickers(DataMap config) {
-        setUpColorPickerSelection(config);
-    }
-
-    // TODO：To be deleted.
-    private void setUpColorPickerSelection(DataMap config) {
-        DataMap data = config;
-        Resources res = getResources();
-
-//        String defaultColorName = "Black";
-//        int defaultColor = Color.parseColor(defaultColorName);
-//        int color;
-//        if (config != null) {
-//            color = config.getInt(KEY_COLOR, defaultColor);
-//        } else {
-//            color = defaultColor;
-//        }
-//        String[] colorNames = getResources().getStringArray(R.array.progress_spinner_sequence);
-//        for (int i = 0; i < colorNames.length; i++) {
-//            if (Color.parseColor(colorNames[i]) == color) {
-//                break;
-//            }
-//        }
     }
 }

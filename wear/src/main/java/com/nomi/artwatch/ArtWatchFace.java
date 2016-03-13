@@ -31,7 +31,6 @@ import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -46,7 +45,6 @@ import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
@@ -61,58 +59,81 @@ import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subjects.BehaviorSubject;
+import timber.log.Timber;
 
 public class ArtWatchFace extends CanvasWatchFaceService {
-    /**
-     * Update rate in milliseconds for interactive mode. We update once a second to advance the
-     * second hand.
-     */
+
     private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
-
-    /**
-     * Handler message id for updating the time periodically in interactive mode.
-     */
     private static final int MSG_UPDATE_TIME = 0;
-
-    private static final String TAG = "ArtWatchFace";
+    private static final String PATH_OF_GIF = "/gif";
+    private static final String KEY_GIF = "gif";
 
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine implements DataApi.DataListener,
-            GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-        Paint mBackgroundPaint;
-        Paint mHandPaint;
-        boolean mAmbient;
-        Time mTime;
+    private class Engine extends CanvasWatchFaceService.Engine {
+        private Paint mHandPaint;
+        private Time mTime;
+        private Handler mUpdateTimeHandler = new EngineHandler(this);
+        private boolean mAmbient;
+        private boolean mRegisteredTimeZoneReceiver = false;
+        private boolean mLowBitAmbient;
+        private GifImageView mGifImageView;
 
-        final Handler mUpdateTimeHandler = new EngineHandler(this);
-        int mInteractiveBackgroundColor =
-                DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND;
-
-        final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
+        private BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mTime.clear(intent.getStringExtra("time-zone"));
                 mTime.setToNow();
             }
         };
-        boolean mRegisteredTimeZoneReceiver = false;
 
-        private GifImageView mGifImageView;
+        private DataApi.DataListener mDataListener = new DataApi.DataListener() {
+            /**
+             * Called when the gif on the phone was selected.
+             * Receive gif data as Asset.
+             *
+             * TODO：To be fixed cause it takes too long time to receiver the gif data successfully.
+             */
+            @Override
+            public void onDataChanged(DataEventBuffer dataEvents) {
+                for (DataEvent event : dataEvents) {
+                    if (event.getType() == DataEvent.TYPE_CHANGED &&
+                            event.getDataItem().getUri().getPath().equals(PATH_OF_GIF)) {
 
-        /**
-         * Whether the display supports fewer bits for each color in ambient mode. When true, we
-         * disable anti-aliasing in ambient mode.
-         */
-        boolean mLowBitAmbient;
+                        DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+                        Asset asset = dataMapItem.getDataMap().getAsset(KEY_GIF);
+                        // Change Gif image.
+                        changeGifWithAsset(asset);
+                    }
+                }
+            }
+        };
 
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(ArtWatchFace.this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
+        private GoogleApiClient.ConnectionCallbacks mGoogleConnectionCallback = new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(Bundle connectionHint) {
+                Wearable.DataApi.addListener(mGoogleApiClient, mDataListener);
+            }
+
+            @Override
+            public void onConnectionSuspended(int cause) {
+                // TODO：Handling
+            }
+        };
+
+        private GoogleApiClient.OnConnectionFailedListener mGoogleConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
+            @Override
+            public void onConnectionFailed(ConnectionResult connectionResult) {
+                // TODO：Error handling
+            }
+        };
+
+        private GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(ArtWatchFace.this)
+                .addConnectionCallbacks(mGoogleConnectionCallback)
+                .addOnConnectionFailedListener(mGoogleConnectionFailedListener)
                 .addApi(Wearable.API)
                 .build();
 
@@ -127,9 +148,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                     .build());
 
             Resources resources = ArtWatchFace.this.getResources();
-
-            mBackgroundPaint = new Paint();
-            mBackgroundPaint.setColor(mInteractiveBackgroundColor);
 
             mHandPaint = new Paint();
             mHandPaint.setColor(resources.getColor(R.color.analog_hands));
@@ -173,9 +191,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 }
                 invalidate();
             }
-
-            // Whether the timer should be running depends on whether we're visible (as well as
-            // whether we're in ambient mode), so we may need to start or stop the timer.
             updateTimer();
         }
 
@@ -187,7 +202,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             int heightSpec = View.MeasureSpec.makeMeasureSpec(bounds.height(), View.MeasureSpec.EXACTLY);
             mGifImageView.measure(widthSpec, heightSpec);
             mGifImageView.layout(0, 0, bounds.width(), bounds.height());
-
             mGifImageView.draw(canvas);
 
             postInvalidate();
@@ -201,43 +215,18 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 mGoogleApiClient.connect();
 
                 registerReceiver();
-
-                // Update time zone in case it changed while we weren't visible.
                 mTime.clear(TimeZone.getDefault().getID());
                 mTime.setToNow();
+
             } else {
                 unregisterReceiver();
 
                 if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-                    Wearable.DataApi.removeListener(mGoogleApiClient, this);
+                    Wearable.DataApi.removeListener(mGoogleApiClient, mDataListener);
                     mGoogleApiClient.disconnect();
                 }
             }
-
-            // Whether the timer should be running depends on whether we're visible (as well as
-            // whether we're in ambient mode), so we may need to start or stop the timer.
             updateTimer();
-        }
-
-        /**
-         * Change the gif image to the gif selected on the phone.
-         * Receive gif data as Asset.
-         * TODO：To be fixed cause it takes too long time to receiver the gif data successfully.
-         *
-         * @param dataEvents
-         */
-        @Override
-        public void onDataChanged(DataEventBuffer dataEvents) {
-            for (DataEvent event : dataEvents) {
-                if (event.getType() == DataEvent.TYPE_CHANGED &&
-                        event.getDataItem().getUri().getPath().equals(DigitalWatchFaceUtil.PATH_OF_GIF)) {
-
-                    DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                    Asset asset = dataMapItem.getDataMap().getAsset(DigitalWatchFaceUtil.KEY_GIF);
-                    // Change Gif image.
-                    changeGifWithAsset(asset);
-                }
-            }
         }
 
         /**
@@ -247,7 +236,9 @@ public class ArtWatchFace extends CanvasWatchFaceService {
          */
         private void changeGifWithAsset(Asset asset) {
             getInputStreamFromAsset(asset)
-                    .subscribe(this::changeGif);
+                    .subscribe(this::changeGif, throwable -> {
+                        Timber.e(throwable.getLocalizedMessage(), throwable);
+                    });
         }
 
         /**
@@ -257,12 +248,9 @@ public class ArtWatchFace extends CanvasWatchFaceService {
          */
         private Observable<InputStream> getInputStreamFromAsset(final Asset asset) {
             if (asset == null) {
-                throw new IllegalArgumentException("Asset must be non-null");
+                return Observable.error(new IllegalArgumentException("Asset must be non-null"));
             }
-
-            BehaviorSubject<InputStream> subject = BehaviorSubject.create();
-
-            Observable
+            return Observable
                     .just(null)
                     .subscribeOn(Schedulers.io())
                     .flatMap(aVoid -> {
@@ -272,17 +260,11 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                                 mGoogleApiClient, asset).await().getInputStream();
                         return Observable.just(assetInputStream);
                     })
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(inputStream -> {
-                        if (inputStream == null) {
-                            Log.w(TAG, "Requested an unknown Asset.");
-                            return;
-                        }
-                        subject.onNext(inputStream);
-
-                    }, subject::onError, subject::onCompleted);
-
-            return subject;
+                    .onErrorResumeNext(throwable -> {
+                        Timber.e(throwable.getLocalizedMessage(), throwable);
+                        return Observable.error(throwable);
+                    })
+                    .observeOn(AndroidSchedulers.mainThread());
         }
 
         /**
@@ -305,14 +287,21 @@ public class ArtWatchFace extends CanvasWatchFaceService {
 
                             @Override
                             public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                Log.w(TAG, "log : " + e.getLocalizedMessage());
+                                Timber.e(e.getLocalizedMessage(), e);
                             }
                         });
             } catch (IOException e) {
-                Log.w(TAG, e.getLocalizedMessage());
+                Timber.e(e.getLocalizedMessage(), e);
             }
         }
 
+        /**
+         * Convert InputStream to byte[].
+         *
+         * @param inputStream
+         * @return
+         * @throws IOException
+         */
         private byte[] toByteArray(InputStream inputStream) throws IOException {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             byte [] buffer = new byte[1024];
@@ -324,73 +313,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 bout.write(buffer, 0, len);
             }
             return bout.toByteArray();
-        }
-
-
-        @Override  // GoogleApiClient.ConnectionCallbacks
-        public void onConnected(Bundle connectionHint) {
-            Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
-            updateConfigDataItemAndUiOnStartup();
-        }
-
-        @Override  // GoogleApiClient.ConnectionCallbacks
-        public void onConnectionSuspended(int cause) {
-
-        }
-
-        @Override  // GoogleApiClient.OnConnectionFailedListener
-        public void onConnectionFailed(ConnectionResult result) {
-
-        }
-
-        private void updateConfigDataItemAndUiOnStartup() {
-            DigitalWatchFaceUtil.fetchConfigDataMap(mGoogleApiClient,
-                    new DigitalWatchFaceUtil.FetchConfigDataMapCallback() {
-                        @Override
-                        public void onConfigDataMapFetched(DataMap startupConfig) {
-                            // If the DataItem hasn't been created yet or some keys are missing,
-                            // use the default values.
-                            setDefaultValuesForMissingConfigKeys(startupConfig);
-                            DigitalWatchFaceUtil.putConfigDataItem(mGoogleApiClient, startupConfig);
-
-                            updateUiForConfigDataMap(startupConfig);
-                        }
-                    }
-            );
-        }
-
-        private void setDefaultValuesForMissingConfigKeys(DataMap config) {
-            addStringKeyIfMissing(config, DigitalWatchFaceUtil.KEY_GIF_URL, "");
-        }
-
-        private void addStringKeyIfMissing(DataMap config, String key, String url) {
-            if (!config.containsKey(key)) {
-                config.putString(key, url);
-            }
-        }
-
-        private void updateUiForConfigDataMap(final DataMap config) {
-            boolean uiUpdated = false;
-            for (String configKey : config.keySet()) {
-                if (!config.containsKey(configKey)) {
-                    continue;
-                }
-//                if (DigitalWatchFaceUtil.KEY_GIF_BYTE_ARRAY.equals(configKey)) {
-//                    byte[] gif = config.getByteArray(configKey);
-//                    if (updateUiForKey(configKey, gif)) {
-//                        uiUpdated = true;
-//                    }
-//                } else {
-//                    String url = config.getString(configKey);
-//                    if (updateUiForKey(configKey, url)) {
-//                        uiUpdated = true;
-//                    }
-//                }
-
-            }
-//            if (uiUpdated) {
-//                invalidate();
-//            }
         }
 
         private void registerReceiver() {
