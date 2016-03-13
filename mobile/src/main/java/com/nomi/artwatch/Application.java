@@ -3,7 +3,6 @@ package com.nomi.artwatch;
 import com.nomi.artwatch.di.component.ApplicationComponent;
 import com.nomi.artwatch.di.component.DaggerApplicationComponent;
 import com.nomi.artwatch.di.module.ApplicationModule;
-import com.squareup.leakcanary.LeakCanary;
 
 import timber.log.Timber;
 
@@ -33,7 +32,6 @@ public class Application extends android.app.Application {
 
     private void init() {
         Config.init(this);
-        LeakCanary.install(this);
         Timber.plant(new Timber.DebugTree());
     }
 }
