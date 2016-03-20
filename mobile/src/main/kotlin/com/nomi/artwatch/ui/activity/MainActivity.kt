@@ -1,5 +1,6 @@
 package com.nomi.artwatch.ui.activity
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -70,7 +71,7 @@ class MainActivity : DrawerActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mPeerId = intent.getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID)
+        mPeerId = intent.getStringExtra(PEER_ID)
         mGoogleApiClient = GoogleApiClient.Builder(this).addConnectionCallbacks(mGoogleConnectionCallback).addOnConnectionFailedListener(mGoogleConnectionFailedListener).addApi(Wearable.API).build()
 
         if (mLoginModel.isAuthorized) {
@@ -164,8 +165,14 @@ class MainActivity : DrawerActivity() {
     }
 
     companion object {
-
+        private val PEER_ID = "peer_id"
         private val PATH_OF_GIF = "/gif"
         private val KEY_GIF = "gif"
+
+        fun createIntent(context: Context, peerId: String?): Intent {
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra(PEER_ID, peerId)
+            return intent
+        }
     }
 }

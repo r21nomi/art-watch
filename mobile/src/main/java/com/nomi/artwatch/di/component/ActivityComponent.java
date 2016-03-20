@@ -2,7 +2,9 @@ package com.nomi.artwatch.di.component;
 
 import com.nomi.artwatch.di.ActivityScope;
 import com.nomi.artwatch.di.module.ActivityModule;
+import com.nomi.artwatch.ui.activity.LoginActivity;
 import com.nomi.artwatch.ui.activity.MainActivity;
+import com.nomi.artwatch.ui.activity.SplashActivity;
 
 import dagger.Component;
 
@@ -17,5 +19,7 @@ import dagger.Component;
         }
 )
 public interface ActivityComponent {
-    void inject(MainActivity mainActivity);
+    void inject(SplashActivity activity);
+    void inject(LoginActivity activity);
+    void inject(MainActivity activity);
 }
