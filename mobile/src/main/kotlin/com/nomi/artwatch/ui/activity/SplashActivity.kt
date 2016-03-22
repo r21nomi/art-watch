@@ -6,6 +6,7 @@ import android.support.wearable.companion.WatchFaceCompanion
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.LoginModel
+import rx.Observable
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -25,10 +26,28 @@ class SplashActivity : InjectActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        if (mLoginModel.isAuthorized) {
-            moveToMain()
+        setToken()
+            .subscribe({aVoid ->
+                if (mLoginModel.isAuthorized) {
+                    moveToMain()
+                } else {
+                    moveToLogin()
+                }
+            }, {throwable ->
+                Timber.e(throwable.message, throwable)
+            })
+    }
+
+    /**
+     * Set token and token secret.
+     */
+    private fun setToken(): Observable<Void> {
+        val uri = intent.data
+        if (uri != null) {
+            return mLoginModel.saveToken(uri)
+
         } else {
-            moveToLogin()
+            return Observable.just(null)
         }
     }
 

@@ -94,6 +94,7 @@ dependencies {
 
     // UI
     compile 'com.yqritc:recyclerview-multiple-viewtypes-adapter:1.1.0'
+    compile 'jp.wasabeef:glide-transformations:2.0.0'
 
     // Debug
     compile 'com.jakewharton.timber:timber:4.1.0'

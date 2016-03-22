@@ -1,17 +1,16 @@
 package com.nomi.artwatch.model;
 
+import android.net.Uri;
+
 import com.nomi.artwatch.Config;
 import com.nomi.artwatch.util.StringUtil;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import oauth.signpost.OAuth;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthProvider;
-import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
-import oauth.signpost.exception.OAuthMessageSignerException;
-import oauth.signpost.exception.OAuthNotAuthorizedException;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
@@ -61,22 +60,40 @@ public class LoginModel {
         return Observable
                 .just(null)
                 .subscribeOn(Schedulers.io())
-                .map(aVoid -> {
+                .flatMap(aVoid -> {
                     String authUrl = "";
                     try {
                         authUrl = provider.retrieveRequestToken(consumer, CALLBACK_URL);
 
-                        mPrefModel.setTokens(consumer.getToken(), consumer.getTokenSecret());
-                    } catch (OAuthMessageSignerException e) {
-                        e.printStackTrace();
-                    } catch (OAuthNotAuthorizedException e) {
-                        e.printStackTrace();
-                    } catch (OAuthExpectationFailedException e) {
-                        e.printStackTrace();
-                    } catch (OAuthCommunicationException e) {
-                        e.printStackTrace();
+                    } catch (Exception e) {
+                        return Observable.error(e);
                     }
-                    return authUrl;
+                    return Observable.just(authUrl);
                 });
+    }
+
+    public Observable<Void> saveToken(Uri uri) {
+        return Observable
+                .just(null)
+                .subscribeOn(Schedulers.io())
+                .flatMap(aVoid -> {
+                    if (!uri.toString().startsWith(CALLBACK_URL)) {
+                        return Observable.error(new IllegalArgumentException("The callback should be started from " + CALLBACK_URL));
+                    }
+                    try {
+                        String oauthVerifier = uri.getQueryParameter(OAuth.OAUTH_VERIFIER);
+                        provider.retrieveAccessToken(consumer, oauthVerifier);
+                        mPrefModel.setTokens(consumer.getToken(), consumer.getTokenSecret());
+
+                    } catch (Exception e) {
+                        return Observable.error(e);
+                    }
+                    return Observable.just(null);
+                });
+    }
+
+    public Observable<Void> logout() {
+        mPrefModel.clear();
+        return Observable.just(null);
     }
 }

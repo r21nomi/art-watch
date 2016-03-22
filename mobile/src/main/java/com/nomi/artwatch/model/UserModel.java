@@ -11,7 +11,6 @@ import javax.inject.Singleton;
 
 import rx.Observable;
 import rx.schedulers.Schedulers;
-import rx.subjects.AsyncSubject;
 import timber.log.Timber;
 
 /**
@@ -26,38 +25,10 @@ public class UserModel extends BaseModel {
     }
 
     public Observable<User> getUser() {
-        AsyncSubject<User> subject = AsyncSubject.create();
-
-        Observable
+        return Observable
                 .just(null)
                 .subscribeOn(Schedulers.io())
-                .subscribe(aVoid -> {
-                    User user = getClient().user();
-
-                    Timber.d("name : " + user.getName());
-
-                    List<Blog> blog = user.getBlogs();
-
-                    Observable
-                            .from(blog)
-                            .forEach(item -> {
-                                Timber.d("Blog name : %1$s, Title : %2$s, Count : %3$s",
-                                        item.getName(),
-                                        item.getTitle(),
-                                        item.getPostCount());
-
-                                posts(item);
-                            });
-
-                    subject.onNext(user);
-
-                }, throwable -> {
-                    Timber.w(throwable, throwable.getLocalizedMessage());
-                    subject.onError(throwable);
-
-                }, subject::onCompleted);
-
-        return subject;
+                .map(aVoid -> getClient().user());
     }
 
     private void posts(Blog blog) {

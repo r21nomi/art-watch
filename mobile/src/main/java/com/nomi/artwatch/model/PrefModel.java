@@ -47,4 +47,8 @@ public class PrefModel {
     public String getTokenSecret() {
         return getPref(TOKEN_PREF).getString(TOKEN_SECRET, "");
     }
+
+    public void clear() {
+        getPref(TOKEN_PREF).edit().clear().commit();
+    }
 }
