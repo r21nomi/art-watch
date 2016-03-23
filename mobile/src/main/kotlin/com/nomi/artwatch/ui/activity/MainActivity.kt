@@ -4,32 +4,24 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.wearable.companion.WatchFaceCompanion
 import android.widget.Toast
 import butterknife.bindView
-
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.SimpleTarget
-import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.PutDataMapRequest
-import com.google.android.gms.wearable.PutDataRequest
 import com.google.android.gms.wearable.Wearable
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
-import com.nomi.artwatch.model.LoginModel
 import com.nomi.artwatch.model.PostModel
-import com.nomi.artwatch.model.UserModel
 import com.nomi.artwatch.ui.view.ArtView
-
-import javax.inject.Inject
-
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Action1
 import timber.log.Timber
+import javax.inject.Inject
 
 /**
  * Created by Ryota Niinomi on 2015/11/04.
@@ -40,11 +32,7 @@ class MainActivity : DrawerActivity() {
     private var mPeerId: String? = null
 
     @Inject
-    lateinit var mUserModel: UserModel
-    @Inject
     lateinit var mPostModel: PostModel
-    @Inject
-    lateinit var mLoginModel: LoginModel
 
     val mArtView: ArtView by bindView(R.id.artView)
 

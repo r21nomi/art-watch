@@ -22,38 +22,50 @@
             />
     </RelativeLayout>
 
-    <!--<RelativeLayout android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_gravity="left|start">-->
-
-    <!--</RelativeLayout>-->
-
-    <!--<ListView-->
-        <!--android:id="@+id/navList"-->
-        <!--android:layout_width="200dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="left|start"-->
-        <!--android:background="#ffeeeeee"/>-->
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="left|start"
-        android:background="@color/gray"
+        android:background="@color/white"
         >
 
-        <Button
-            android:id="@+id/btn1"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/drawer_image_height"
+            android:background="@color/gray"
+            android:gravity="center"
+            android:padding="@dimen/margin_16dp"
+            android:clipToPadding="true"
+            >
+
+            <ImageView
+                android:id="@+id/userThumb"
+                android:layout_width="@dimen/drawer_thumb_height"
+                android:layout_height="@dimen/drawer_thumb_height"
+                android:layout_centerVertical="true"
+                />
+
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/font_size_16sp"
+                android:textColor="@color/black"
+                android:layout_toRightOf="@+id/userThumb"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/margin_8dp"
+                />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/logoutButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Red"
-            />
-        <Button
-            android:id="@+id/btn2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Blue"
+            android:text="@string/logout_button_label"
+            android:textSize="@dimen/font_size_14sp"
+            android:textColor="@color/black"
+            android:padding="@dimen/margin_16dp"
             />
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>
