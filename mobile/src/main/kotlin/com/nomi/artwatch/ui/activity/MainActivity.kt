@@ -4,6 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.support.v7.widget.AppCompatSpinner
+import android.view.View
+import android.widget.AdapterView
+import android.widget.TextView
 import android.widget.Toast
 import butterknife.bindView
 import com.bumptech.glide.Glide
@@ -17,6 +21,7 @@ import com.google.android.gms.wearable.Wearable
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.PostModel
+import com.nomi.artwatch.ui.adapter.binder.BlogAdapter
 import com.nomi.artwatch.ui.view.ArtView
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Action1
@@ -30,11 +35,32 @@ class MainActivity : DrawerActivity() {
 
     private var mGoogleApiClient: GoogleApiClient? = null
     private var mPeerId: String? = null
+    private var mBlogAdapter: BlogAdapter? = null
+    private var mCurrentBlogName: String? = null
 
     @Inject
     lateinit var mPostModel: PostModel
 
-    val mArtView: ArtView by bindView(R.id.artView)
+    val mSpinner: AppCompatSpinner by bindView(R.id.spinner)
+    val mArtView: ArtView by bindView(R.id.art_view)
+    val mEmptyView: TextView by bindView(R.id.empty_view)
+
+    val mOnItemSelectedListener: AdapterView.OnItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        /**
+         * Change blog.
+         */
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            val blogName: String? = mBlogAdapter?.getItem(position)?.name
+            mCurrentBlogName = blogName
+            showGifs()
+
+            Timber.d("onItemSelected : " + blogName)
+        }
+
+        override fun onNothingSelected(parent: AdapterView<*>?) {
+            Timber.d("onNothingSelected")
+        }
+    }
 
     private val mGoogleConnectionCallback = object : GoogleApiClient.ConnectionCallbacks {
         override fun onConnected(connectionHint: Bundle?) {
@@ -62,14 +88,7 @@ class MainActivity : DrawerActivity() {
         mPeerId = intent.getStringExtra(PEER_ID)
         mGoogleApiClient = GoogleApiClient.Builder(this).addConnectionCallbacks(mGoogleConnectionCallback).addOnConnectionFailedListener(mGoogleConnectionFailedListener).addApi(Wearable.API).build()
 
-        if (mLoginModel.isAuthorized) {
-            // Already authorized.
-            fetchGifPosts()
-
-        } else {
-            // Authorize now.
-            authorize()
-        }
+        initBlogList()
     }
 
     override fun onStart() {
@@ -101,14 +120,60 @@ class MainActivity : DrawerActivity() {
     }
 
     /**
+     * Initialize blog list.
+     */
+    private fun initBlogList() {
+        mBlogAdapter = BlogAdapter(this);
+        mUserModel
+                .user
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({user ->
+                    if (!user.blogs.isEmpty()) {
+                        mCurrentBlogName = user.blogs[0].name
+                        showGifs()
+                    }
+                    mBlogAdapter?.setDataSet(user.blogs)
+                    mSpinner.adapter = mBlogAdapter
+
+                }, {throwable ->
+                    Timber.e(throwable.message, throwable)
+                })
+
+        mSpinner.onItemSelectedListener = mOnItemSelectedListener
+    }
+
+    private fun showGifs() {
+        if (mLoginModel.isAuthorized) {
+            // Already authorized.
+            fetchGifPosts()
+
+        } else {
+            // Authorize now.
+            authorize()
+        }
+    }
+
+    private fun toggleEmptyView(isEmpty: Boolean) {
+        if (isEmpty) {
+            mArtView.visibility = View.GONE
+            mEmptyView.visibility = View.VISIBLE
+
+        } else {
+            mArtView.visibility = View.VISIBLE
+            mEmptyView.visibility = View.GONE
+        }
+    }
+
+    /**
      * Fetch Gif posts from Tumblr.
      */
     private fun fetchGifPosts() {
         mPostModel
-                .getPhotoPost("ryotaniinomi")
+                .getPhotoPost(mCurrentBlogName)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ items ->
                     mArtView.init(items, Action1 { url -> onGifSelected(url) })
+                    toggleEmptyView(items.isEmpty())
 
                 }, { throwable ->
                     Timber.w(throwable, throwable.message)
