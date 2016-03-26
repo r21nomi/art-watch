@@ -16,10 +16,11 @@ import rx.functions.Action1
  */
 class ArtView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
 
-    private val mAdapter = ListBindAdapter()
+    private var mAdapter: ListBindAdapter = ListBindAdapter()
     private var mOnSelect: Action1<String>? = null
 
     fun init(photos: List<Photo>, onSelect: Action1<String>) {
+        mAdapter = ListBindAdapter()
         mOnSelect = onSelect
 
         initAdapter(photos)

@@ -6,4 +6,5 @@
 
     <string name="login_tumblr" translatable="false">Login to Tumblr</string>
     <string name="logout_button_label">Logout</string>
+    <string name="no_gifs">No Gifs</string>
 </resources>
