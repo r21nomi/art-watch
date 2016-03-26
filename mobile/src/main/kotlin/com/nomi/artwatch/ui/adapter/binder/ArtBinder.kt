@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import butterknife.bindView
-
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.animation.GlideAnimation
@@ -13,10 +12,8 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.nomi.artwatch.R
 import com.nomi.artwatch.util.WindowUtil
 import com.tumblr.jumblr.types.Photo
-import com.tumblr.jumblr.types.PhotoSize
 import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBindAdapter
 import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBinder
-
 import pl.droidsonroids.gif.GifImageView
 import rx.functions.Action1
 
@@ -38,19 +35,22 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
 
         holder.mPosition = position
 
-        Glide.with(holder.mGifView.context).load(photoSize.url).asGif().into(object : SimpleTarget<GifDrawable>() {
-            override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
-                val width = WindowUtil.getWidth(holder.mGifView.context)
-                val height = width * resource.intrinsicHeight / resource.intrinsicWidth
-                val params = holder.mGifView.layoutParams
+        Glide.with(holder.mGifView.context)
+                .load(photoSize.url)
+                .asGif()
+                .into(object : SimpleTarget<GifDrawable>() {
+                    override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
+                        val width = WindowUtil.getWidth(holder.mGifView.context)
+                        val height = width * resource.intrinsicHeight / resource.intrinsicWidth
+                        val params = holder.mGifView.layoutParams
 
-                params.width = width
-                params.height = height
-                holder.mGifView.background = resource
+                        params.width = width
+                        params.height = height
+                        holder.mGifView.background = resource
 
-                resource.start()
-            }
-        })
+                        resource.start()
+                    }
+                })
     }
 
     override fun getItemCount(): Int {

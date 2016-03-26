@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Handler;
 
+import com.squareup.okhttp.OkHttpClient;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -37,5 +39,11 @@ public class ApplicationModule {
     @Singleton
     Handler provideHandler() {
         return new Handler();
+    }
+
+    @Provides
+    @Singleton
+    OkHttpClient provideOkHttpClient() {
+        return new OkHttpClient();
     }
 }
