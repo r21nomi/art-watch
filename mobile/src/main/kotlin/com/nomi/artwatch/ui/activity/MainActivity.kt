@@ -23,6 +23,7 @@ import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.PostModel
 import com.nomi.artwatch.ui.adapter.binder.BlogAdapter
 import com.nomi.artwatch.ui.view.ArtView
+import hugo.weaving.DebugLog
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Action1
 import timber.log.Timber
@@ -185,6 +186,7 @@ class MainActivity : DrawerActivity() {
 
      * @param url
      */
+    @DebugLog
     private fun onGifSelected(url: String) {
         if (mPeerId != null) {
             Glide.with(this).load(url).asGif().into(object : SimpleTarget<GifDrawable>() {
