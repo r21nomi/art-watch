@@ -16,6 +16,9 @@
 
 package com.nomi.artwatch;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,13 +27,17 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.support.wearable.watchface.CanvasWatchFaceService;
+import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -64,6 +71,7 @@ import timber.log.Timber;
 public class ArtWatchFace extends CanvasWatchFaceService {
 
     private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
+    private static final long HIDE_GIF_IMAGE_TIMER_MS = TimeUnit.SECONDS.toMillis(30);
     private static final int MSG_UPDATE_TIME = 0;
     private static final String PATH_OF_GIF = "/gif";
     private static final String KEY_GIF = "gif";
@@ -77,10 +85,19 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         private Paint mHandPaint;
         private Time mTime;
         private Handler mUpdateTimeHandler = new EngineHandler(this);
+        private Handler mHandler = new Handler();
         private boolean mAmbient;
         private boolean mRegisteredTimeZoneReceiver = false;
         private boolean mLowBitAmbient;
         private GifImageView mGifImageView;
+        private GifDrawable mGifResource;
+        private Runnable mRunTimer = () -> {
+            // Hide gif image
+            Log.d(this.getClass().getCanonicalName(), "Time has passed. Gif image is hidden.");
+            stopGifAnimate();
+            hideGifImage();
+        };
+        private boolean mShouldAnimateGif;
 
         private BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
@@ -161,6 +178,39 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             mGifImageView = (GifImageView)inflater.inflate(R.layout.gif_view, null).findViewById(R.id.gifView);
             mGifImageView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
             mGifImageView.setBackgroundResource(R.drawable.image_2);
+
+            // Enable onTapCommand.
+            setWatchFaceStyle(new WatchFaceStyle.Builder(ArtWatchFace.this)
+                    .setAcceptsTapEvents(true)
+                    .build());
+        }
+
+        @Override
+        public void onTapCommand(@TapType int tapType, int x, int y, long eventTime) {
+            Log.d(this.getClass().getCanonicalName(), "onTapCommand, tapType : " + tapType);
+
+            switch (tapType) {
+                case WatchFaceService.TAP_TYPE_TAP:
+                    // This will not be called if swiped.
+                    if (mGifImageView.getVisibility() == View.GONE) {
+                        showGifImage();
+                        startGifAnimate();
+
+                    } else {
+                        toggleGifAnimateState();
+                    }
+                    break;
+
+                case WatchFaceService.TAP_TYPE_TOUCH:
+                    break;
+
+                case WatchFaceService.TAP_TYPE_TOUCH_CANCEL:
+                    break;
+
+                default:
+                    super.onTapCommand(tapType, x, y, eventTime);
+                    break;
+            }
         }
 
         @Override
@@ -281,8 +331,10 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                             @Override
                             public void onResourceReady(com.bumptech.glide.load.resource.gif.GifDrawable resource,
                                                         GlideAnimation<? super GifDrawable> glideAnimation) {
-                                mGifImageView.setBackground(resource);
-                                resource.start();
+                                mShouldAnimateGif = true;
+                                mGifResource = resource;
+                                mGifImageView.setBackground(mGifResource);
+                                startGifAnimate();
                             }
 
                             @Override
@@ -363,6 +415,78 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                         - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
                 mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
             }
+        }
+
+        /**
+         * Toggle animate state for gif image.
+         */
+        private void toggleGifAnimateState() {
+            mShouldAnimateGif = !mShouldAnimateGif;
+
+            if (mShouldAnimateGif) {
+                startGifAnimate();
+            } else {
+                stopGifAnimate();
+            }
+        }
+
+        private void startGifAnimate() {
+            if (mGifResource != null) {
+                mShouldAnimateGif = true;
+                mGifResource.start();
+                startTimer();
+            }
+        }
+
+        private void stopGifAnimate() {
+            if (mGifResource != null) {
+                mShouldAnimateGif = false;
+                mGifResource.stop();
+                stopTimer();
+            }
+        }
+
+        private void showGifImage() {
+            mGifImageView.setVisibility(View.VISIBLE);
+            mGifImageView.setBackground(mGifResource);
+            ValueAnimator animator = ValueAnimator.ofInt(0, 255).setDuration(300);
+            animator.addUpdateListener(animation -> {
+                int num = (int)animation.getAnimatedValue();
+                mGifResource.setAlpha(num);
+            });
+            animator.start();
+        }
+
+        private void hideGifImage() {
+            ValueAnimator animator = ValueAnimator.ofInt(255, 0).setDuration(300);
+            animator.addUpdateListener(animation -> {
+                int num = (int)animation.getAnimatedValue();
+                // TODO：To be faded out because it's not faded out now.
+                mGifResource.setAlpha(num);
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    // GifImageView is not hidden by setVisibility...
+                    mGifImageView.setVisibility(View.GONE);
+                    // Change background image to hide GifImageView.
+                    mGifImageView.setBackground(new ColorDrawable(ContextCompat.getColor(getApplicationContext(), R.color.black)));
+                }
+            });
+            animator.start();
+        }
+
+        /**
+         * Start timer to hide gif image.
+         */
+        private void startTimer() {
+            stopTimer();
+            mHandler.postDelayed(mRunTimer, HIDE_GIF_IMAGE_TIMER_MS);
+        }
+
+        private void stopTimer() {
+            mHandler.removeCallbacks(mRunTimer);
         }
     }
 
