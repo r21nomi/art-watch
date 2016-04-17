@@ -131,7 +131,6 @@ abstract class DrawerActivity : InjectActivity() {
                     Glide.with(this)
                             .load(url)
                             .bitmapTransform(CropCircleTransformation(this))
-                            .placeholder(R.drawable.__leak_canary_icon)
                             .into(mUserThumb)
                 });
     }
