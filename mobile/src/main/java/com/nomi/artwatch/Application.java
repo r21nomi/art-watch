@@ -29,13 +29,12 @@ public class Application extends android.app.Application {
     public void onCreate() {
         super.onCreate();
 
-        init();
-
         mApplicationComponent = DaggerApplicationComponent.builder()
                 .applicationModule(new ApplicationModule(this))
                 .build();
-
         mApplicationComponent.inject(this);
+
+        init();
     }
 
     public ApplicationComponent getApplicationComponent() {
