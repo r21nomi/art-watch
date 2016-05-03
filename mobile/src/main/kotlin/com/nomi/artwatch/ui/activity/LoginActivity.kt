@@ -39,7 +39,7 @@ class LoginActivity : InjectActivity() {
 
         setContentView(R.layout.activity_login)
 
-        Glide.with(this).load(R.raw.image_1).asGif().into(object : SimpleTarget<GifDrawable>() {
+        Glide.with(this).load(R.raw.gen_art_1).asGif().into(object : SimpleTarget<GifDrawable>() {
             override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
                 mGifView.setImageDrawable(resource)
                 resource.start()
