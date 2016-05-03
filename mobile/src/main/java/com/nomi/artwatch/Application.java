@@ -21,6 +21,7 @@ import timber.log.Timber;
 public class Application extends android.app.Application {
 
     private ApplicationComponent mApplicationComponent;
+    public static String sPeerId = null;
 
     @Inject
     OkHttpClient mOkHttpClient;

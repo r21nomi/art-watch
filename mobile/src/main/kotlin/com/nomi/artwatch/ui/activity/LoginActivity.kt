@@ -52,7 +52,7 @@ class LoginActivity : InjectActivity() {
     }
 
     private fun authorize() {
-        mLoginModel
+        val subscription = mLoginModel
                 .login()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ authUrl ->
@@ -62,5 +62,6 @@ class LoginActivity : InjectActivity() {
                 }, { throwable ->
                     Timber.w(throwable, throwable.message)
                 })
+        mSubscriptionsOnDestroy.add(subscription)
     }
 }

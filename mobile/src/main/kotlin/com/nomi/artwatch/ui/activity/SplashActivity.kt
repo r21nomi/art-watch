@@ -3,10 +3,12 @@ package com.nomi.artwatch.ui.activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.wearable.companion.WatchFaceCompanion
+import com.nomi.artwatch.Application
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.LoginModel
 import rx.Observable
+import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -26,16 +28,20 @@ class SplashActivity : InjectActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        setToken()
-            .subscribe({aVoid ->
-                if (mLoginModel.isAuthorized) {
-                    moveToMain()
-                } else {
-                    moveToLogin()
-                }
-            }, {throwable ->
-                Timber.e(throwable.message, throwable)
-            })
+        Application.sPeerId = intent.getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID)
+
+        val subscription = setToken()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({aVoid ->
+                    if (mLoginModel.isAuthorized) {
+                        moveToMain()
+                    } else {
+                        moveToLogin()
+                    }
+                }, {throwable ->
+                    Timber.e(throwable.message, throwable)
+                })
+        mSubscriptionsOnDestroy.add(subscription)
     }
 
     /**
@@ -58,7 +64,7 @@ class SplashActivity : InjectActivity() {
     }
 
     private fun moveToMain() {
-        val intent = MainActivity.createIntent(this, intent.getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID))
+        val intent = MainActivity.createIntent(this)
         startActivity(intent)
         finish();
     }

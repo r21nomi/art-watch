@@ -7,7 +7,7 @@ apply plugin: 'android-apt'
 apply plugin: 'com.jakewharton.hugo'
 
 buildscript {
-    ext.kotlin_version = '1.0.0'
+    ext.kotlin_version = '1.0.1'
     repositories {
         jcenter()
         mavenCentral()
@@ -74,10 +74,12 @@ dependencies {
     compile "com.google.android.gms:play-services-wearable:$PLAY_SERVICES_VERSION"
 
     // Network
-//    compile 'se.akerfeldt:okhttp-signpost:1.0.0'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'oauth.signpost:signpost-commonshttp4:1.2.1.2'
     compile 'oauth.signpost:signpost-core:1.2.1.2'
+
+    // DB
+    compile 'com.squareup.sqlbrite:sqlbrite:0.6.3'
 
     // DI
     compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'

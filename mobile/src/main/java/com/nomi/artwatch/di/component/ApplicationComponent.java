@@ -7,6 +7,7 @@ import com.nomi.artwatch.model.LoginModel;
 import com.nomi.artwatch.model.PostModel;
 import com.nomi.artwatch.model.PrefModel;
 import com.nomi.artwatch.model.UserModel;
+import com.squareup.sqlbrite.BriteDatabase;
 
 import javax.inject.Singleton;
 
@@ -22,6 +23,7 @@ import dagger.Component;
 public interface ApplicationComponent {
     void inject(Application application);
 
+    BriteDatabase briteDatabase();
     PrefModel prefModel();
     LoginModel loginModel();
     UserModel userModel();

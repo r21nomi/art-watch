@@ -11,7 +11,7 @@ import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.SimpleTarget
 import com.nomi.artwatch.R
 import com.nomi.artwatch.util.WindowUtil
-import com.tumblr.jumblr.types.Photo
+import com.tumblr.jumblr.types.PhotoSize
 import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBindAdapter
 import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBinder
 import pl.droidsonroids.gif.GifImageView
@@ -21,8 +21,8 @@ import rx.functions.Action1
  * Created by Ryota Niinomi on 15/11/8.
  */
 class ArtBinder(dataBindAdapter: DataBindAdapter,
-                private val mDataSet: List<Photo>,
-                private val mListener: Action1<String>?) : DataBinder<ArtBinder.ViewHolder>(dataBindAdapter) {
+                private val mDataSet: List<PhotoSize>,
+                private val mListener: Action1<PhotoSize>?) : DataBinder<ArtBinder.ViewHolder>(dataBindAdapter) {
 
     override fun newViewHolder(parent: ViewGroup): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_art, parent, false)
@@ -31,7 +31,7 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
     }
 
     override fun bindViewHolder(holder: ViewHolder, position: Int) {
-        val photoSize = mDataSet[position].originalSize
+        val photoSize = mDataSet[position]
 
         holder.mPosition = position
 
@@ -64,8 +64,8 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
 
         init {
             mGifView.setOnClickListener({
-                val photoSize = mDataSet[mPosition].originalSize
-                mListener?.call(photoSize.url)
+                val photoSize = mDataSet[mPosition]
+                mListener?.call(photoSize)
             })
         }
     }

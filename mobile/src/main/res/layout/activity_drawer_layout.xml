@@ -1,0 +1,85 @@
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/toolbar_height"
+            android:elevation="4dp">
+
+            <android.support.v7.widget.AppCompatSpinner
+                android:id="@+id/spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </android.support.v7.widget.Toolbar>
+
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/toolbar"
+            />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left|start"
+        android:background="@color/white"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/drawer_image_height"
+            android:background="@color/gray"
+            android:gravity="center"
+            android:padding="@dimen/margin_16dp"
+            android:clipToPadding="true"
+            >
+
+            <ImageView
+                android:id="@+id/userThumb"
+                android:layout_width="@dimen/drawer_thumb_height"
+                android:layout_height="@dimen/drawer_thumb_height"
+                android:layout_centerVertical="true"
+                />
+
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/font_size_16sp"
+                android:textColor="@color/black"
+                android:layout_toRightOf="@+id/userThumb"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/margin_8dp"
+                />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/historyButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/history_button_label"
+            android:textSize="@dimen/font_size_14sp"
+            android:textColor="@color/black"
+            android:padding="@dimen/margin_16dp"/>
+
+        <TextView
+            android:id="@+id/logoutButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/logout_button_label"
+            android:textSize="@dimen/font_size_14sp"
+            android:textColor="@color/black"
+            android:padding="@dimen/margin_16dp"
+            />
+    </LinearLayout>
+</android.support.v4.widget.DrawerLayout>
