@@ -35,11 +35,18 @@
         </activity>
 
         <activity android:name=".ui.activity.LoginActivity"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:launchMode="singleTop">
         </activity>
 
         <activity android:name=".ui.activity.MainActivity"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:launchMode="singleTop">
+        </activity>
+
+        <activity android:name=".ui.activity.HistoryActivity"
+            android:theme="@style/AppTheme"
+            android:launchMode="singleTop">
         </activity>
 
         <meta-data

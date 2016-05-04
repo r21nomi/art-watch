@@ -9,6 +9,12 @@ public class PhotoSize {
     private int width, height;
     private String url;
 
+    public PhotoSize(String url, int width, int height) {
+        this.url = url;
+        this.width = width;
+        this.height = height;
+    }
+
     /**
      * Get the URL of this photo at this size
      * @return the URL

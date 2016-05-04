@@ -15,4 +15,6 @@
     <dimen name="font_size_14sp">14sp</dimen>
     <dimen name="font_size_16sp">16sp</dimen>
     <dimen name="font_size_20sp">20sp</dimen>
+
+    <dimen name="toolbar_height">56dp</dimen>
 </resources>

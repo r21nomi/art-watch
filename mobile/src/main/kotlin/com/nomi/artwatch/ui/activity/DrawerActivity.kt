@@ -2,22 +2,39 @@ package com.nomi.artwatch.ui.activity
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.AppCompatSpinner
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import butterknife.bindView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.gif.GifDrawable
+import com.bumptech.glide.request.animation.GlideAnimation
+import com.bumptech.glide.request.target.SimpleTarget
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.wearable.Asset
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
+import com.nomi.artwatch.Application
 import com.nomi.artwatch.R
+import com.nomi.artwatch.data.entity.PhotoSizeEntity
 import com.nomi.artwatch.model.BlogModel
 import com.nomi.artwatch.model.LoginModel
 import com.nomi.artwatch.model.UserModel
+import com.squareup.sqlbrite.BriteDatabase
+import com.tumblr.jumblr.types.PhotoSize
+import hugo.weaving.DebugLog
 import jp.wasabeef.glide.transformations.CropCircleTransformation
 import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
@@ -28,7 +45,27 @@ import javax.inject.Inject
  */
 abstract class DrawerActivity : InjectActivity() {
 
+    companion object {
+        private val PATH_OF_GIF = "/gif"
+        private val KEY_GIF = "gif"
+    }
+
+    private var mGoogleApiClient: GoogleApiClient? = null
     private var mDrawerToggle: ActionBarDrawerToggle? = null
+
+    private val mGoogleConnectionCallback = object : GoogleApiClient.ConnectionCallbacks {
+        override fun onConnected(connectionHint: Bundle?) {
+            if (Application.sPeerId != null) {
+                Timber.d("Connected to wear.")
+            }
+        }
+
+        override fun onConnectionSuspended(cause: Int) {
+            // TODO：Handling
+        }
+    }
+
+    private val mGoogleConnectionFailedListener = GoogleApiClient.OnConnectionFailedListener { }// TODO：Error handling
 
     @Inject
     lateinit var mLoginModel: LoginModel
@@ -36,19 +73,43 @@ abstract class DrawerActivity : InjectActivity() {
     lateinit var mUserModel: UserModel
     @Inject
     lateinit var mBlogModel: BlogModel
+    @Inject
+    lateinit var mDb: BriteDatabase
 
     val mDrawerLayout: DrawerLayout by bindView(R.id.drawer_layout)
+    val mSpinner: AppCompatSpinner by bindView(R.id.spinner)
+    val mContainer: ViewGroup by bindView(R.id.container)
     val mUserThumb: ImageView by bindView(R.id.userThumb)
     val mUserName: TextView by bindView( R.id.userName)
     val mLogoutBtn: TextView by bindView(R.id.logoutButton)
+    val mHistoryBtn: TextView by bindView(R.id.historyButton)
 
     protected abstract val layout: Int
+    protected abstract val toolbarName: Int
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout)
+        setContentView(R.layout.activity_drawer_layout)
+
+        if (layout != 0) {
+            layoutInflater.inflate(layout, mContainer)
+        }
+
+        mGoogleApiClient = GoogleApiClient.Builder(this).addConnectionCallbacks(mGoogleConnectionCallback).addOnConnectionFailedListener(mGoogleConnectionFailedListener).addApi(Wearable.API).build()
 
         initDrawer()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mGoogleApiClient!!.connect()
+    }
+
+    override fun onStop() {
+        if (mGoogleApiClient != null && mGoogleApiClient!!.isConnected) {
+            mGoogleApiClient!!.disconnect()
+        }
+        super.onStop()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -75,6 +136,53 @@ abstract class DrawerActivity : InjectActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    /**
+     * Send an request to change gif image with selected one.
+     */
+    @DebugLog
+    fun onGifSelected(photoSize: PhotoSize) {
+        if (Application.sPeerId != null) {
+            updatePhotoSizeEntity(photoSize)
+
+            Glide.with(this).load(photoSize.url).asGif().into(object : SimpleTarget<GifDrawable>() {
+                override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
+                    // Convert GifDrawable to Asset.
+                    val asset = createAssetFromDrawable(resource)
+
+                    val dataMap = PutDataMapRequest.create(PATH_OF_GIF)
+                    dataMap.dataMap.putAsset(KEY_GIF, asset)
+                    val request = dataMap.asPutDataRequest()
+
+                    // Send the request.
+                    Wearable.DataApi.putDataItem(mGoogleApiClient, request)
+
+                    Toast.makeText(this@DrawerActivity, "changed", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
+    }
+
+    /**
+     * Update PhotoSizeEntity table.
+     */
+    private fun updatePhotoSizeEntity(photoSize: PhotoSize) {
+        mDb.insert(PhotoSizeEntity.TABLE, PhotoSizeEntity
+                .Builder()
+                .url(photoSize.url)
+                .width(photoSize.width)
+                .height(photoSize.height)
+                .updatedAt(System.currentTimeMillis())
+                .build(), SQLiteDatabase.CONFLICT_REPLACE)
+    }
+
+    /**
+     * Create asset for sending the gif data to wear.
+     */
+    private fun createAssetFromDrawable(drawable: GifDrawable): Asset {
+        val byteArray = drawable.data
+        return Asset.createFromBytes(byteArray)
+    }
+
     private fun initDrawer() {
         val toolbar = findViewById(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
@@ -82,8 +190,8 @@ abstract class DrawerActivity : InjectActivity() {
         mDrawerToggle = object : ActionBarDrawerToggle(
                 this,
                 mDrawerLayout,
-                R.string.app_name,
-                R.string.app_name) {
+                toolbarName,
+                toolbarName) {
             override fun onDrawerClosed(view: View?) {
                 super.onDrawerClosed(view)
             }
@@ -100,19 +208,15 @@ abstract class DrawerActivity : InjectActivity() {
         supportActionBar!!.setHomeButtonEnabled(true)
 
         mLogoutBtn.setOnClickListener({
-            AlertDialog.Builder(this, R.style.DefaultDialog)
-                    .setTitle("Logout")
-                    .setMessage("Are you sure?")
-                    .setPositiveButton("Yes", {dialogInterface, i ->
-                        mLoginModel.logout().subscribe({aVoid -> startActivity()})
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .create()
-                    .show()
+            logout()
+        })
+
+        mHistoryBtn.setOnClickListener({
+            startHistoryActivity()
         })
 
         // User info
-        mUserModel
+        val subscription = mUserModel
                 .user
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({user ->
@@ -121,10 +225,29 @@ abstract class DrawerActivity : InjectActivity() {
                 }, {throwable ->
                     Timber.e(throwable.message, throwable)
                 })
+        mSubscriptionsOnDestroy.add(subscription)
+    }
+
+    private fun logout() {
+        AlertDialog.Builder(this, R.style.DefaultDialog)
+                .setTitle("Logout")
+                .setMessage("Are you sure?")
+                .setPositiveButton("Yes", {dialogInterface, i ->
+                    mLoginModel.logout().subscribe({aVoid -> startActivity()})
+                })
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show()
+    }
+
+    private fun startHistoryActivity() {
+        mDrawerLayout.closeDrawer(GravityCompat.START)
+        val intent: Intent = HistoryActivity.createIntent(this)
+        startActivity(intent)
     }
 
     private fun setUserThumb() {
-        mBlogModel
+        val subscription = mBlogModel
                 .getAvatar("ryotaniinomi")
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({url ->
@@ -132,14 +255,15 @@ abstract class DrawerActivity : InjectActivity() {
                             .load(url)
                             .bitmapTransform(CropCircleTransformation(this))
                             .into(mUserThumb)
-                });
+                })
+        mSubscriptionsOnDestroy.add(subscription)
     }
 
     private fun startActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent);
-        finish();
+        startActivity(intent)
+        finish()
     }
 }
