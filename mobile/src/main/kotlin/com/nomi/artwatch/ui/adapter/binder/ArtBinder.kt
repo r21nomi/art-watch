@@ -16,13 +16,15 @@ import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBindAdapter
 import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBinder
 import pl.droidsonroids.gif.GifImageView
 import rx.functions.Action1
+import java.util.*
 
 /**
  * Created by Ryota Niinomi on 15/11/8.
  */
 class ArtBinder(dataBindAdapter: DataBindAdapter,
-                private val mDataSet: List<PhotoSize>,
                 private val mListener: Action1<PhotoSize>?) : DataBinder<ArtBinder.ViewHolder>(dataBindAdapter) {
+
+    private val mDataSet: MutableList<PhotoSize> = ArrayList()
 
     override fun newViewHolder(parent: ViewGroup): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_art, parent, false)
@@ -43,7 +45,6 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
                         val width = WindowUtil.getWidth(holder.mGifView.context)
                         val height = width * resource.intrinsicHeight / resource.intrinsicWidth
                         val params = holder.mGifView.layoutParams
-
                         params.width = width
                         params.height = height
                         holder.mGifView.background = resource
@@ -55,6 +56,11 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
 
     override fun getItemCount(): Int {
         return mDataSet.size
+    }
+
+    fun setDataSet(photoSizes: List<PhotoSize>) {
+        mDataSet.clear()
+        mDataSet.addAll(photoSizes)
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

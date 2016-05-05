@@ -15,25 +15,25 @@ import rx.functions.Action1
 class ArtView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
 
     private var mAdapter: ListBindAdapter = ListBindAdapter()
+    private var mArtBinder: ArtBinder? = null
     private var mOnSelect: Action1<PhotoSize>? = null
 
-    fun init(photos: List<PhotoSize>, onSelect: Action1<PhotoSize>) {
+    fun init(onSelect: Action1<PhotoSize>) {
         mAdapter = ListBindAdapter()
         mOnSelect = onSelect
 
-        initAdapter(photos)
-    }
+        mArtBinder = ArtBinder(mAdapter, mOnSelect)
 
-    private fun initAdapter(photos: List<PhotoSize>) {
-        val artBinder = ArtBinder(mAdapter, photos, mOnSelect)
-
-        mAdapter.addBinder(artBinder)
+        mAdapter.addBinder(mArtBinder)
 
         val layoutManager = LinearLayoutManager(context)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        layoutManager.reverseLayout = false
         setHasFixedSize(false)
         setLayoutManager(layoutManager)
         adapter = mAdapter
+    }
+
+    fun setDataSet(photoSizes: List<PhotoSize>) {
+        mArtBinder?.setDataSet(photoSizes)
+        mArtBinder?.notifyBinderDataSetChanged()
     }
 }
