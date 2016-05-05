@@ -7,7 +7,7 @@ import android.view.View
 import android.widget.TextView
 import butterknife.bindView
 import com.nomi.artwatch.R
-import com.nomi.artwatch.data.entity.PhotoSizeEntity
+import com.nomi.artwatch.data.cache.GifCache
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.ui.view.ArtView
 import rx.android.schedulers.AndroidSchedulers
@@ -20,11 +20,11 @@ import timber.log.Timber
 class HistoryActivity : DrawerActivity() {
 
     companion object {
-        private val QUERY_SELECTED_ITEMS = "SELECT * FROM " + PhotoSizeEntity.TABLE
+        private val QUERY_SELECTED_ITEMS = "SELECT * FROM " + GifCache.TABLE
         private val QUERY_LATEST_ITEM = "SELECT * FROM " +
-                PhotoSizeEntity.TABLE +
+                GifCache.TABLE +
                 " ORDER BY " +
-                PhotoSizeEntity.UPDATED_AT +
+                GifCache.UPDATED_AT +
                 " DESC limit 1"
 
         fun createIntent(context: Context): Intent {
@@ -47,20 +47,20 @@ class HistoryActivity : DrawerActivity() {
         super.onCreate(savedInstanceState)
 
         mSpinner.visibility = View.GONE
-        mArtView.init(Action1 { photoSize -> onGifSelected(photoSize) })
+        mArtView.init(Action1 { gif -> onGifSelected(gif) })
 
         fetchHistoryItems()
     }
 
     private fun fetchHistoryItems() {
-        val subscription = mDb.createQuery(PhotoSizeEntity.TABLE, QUERY_SELECTED_ITEMS)
+        val subscription = mDb.createQuery(GifCache.TABLE, QUERY_SELECTED_ITEMS)
                 .mapToList { cursor ->
-                    return@mapToList PhotoSizeEntity.toPhotoSize(cursor)
+                    return@mapToList GifCache.toGif(cursor)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({photoList ->
-                    if (photoList.isNotEmpty()) {
-                        mArtView.setDataSet(photoList)
+                .subscribe({gifs ->
+                    if (gifs.isNotEmpty()) {
+                        mArtView.setDataSet(gifs)
 
                     } else {
                         toggleEmptyView(true)

@@ -27,13 +27,15 @@ import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.nomi.artwatch.Application
+import com.nomi.artwatch.GifUrlProvider
+import com.nomi.artwatch.GifUrlProvider.Type
 import com.nomi.artwatch.R
-import com.nomi.artwatch.data.entity.PhotoSizeEntity
+import com.nomi.artwatch.data.cache.GifCache
+import com.nomi.artwatch.data.entity.Gif
 import com.nomi.artwatch.model.BlogModel
 import com.nomi.artwatch.model.LoginModel
 import com.nomi.artwatch.model.UserModel
 import com.squareup.sqlbrite.BriteDatabase
-import com.tumblr.jumblr.types.PhotoSize
 import hugo.weaving.DebugLog
 import jp.wasabeef.glide.transformations.CropCircleTransformation
 import rx.android.schedulers.AndroidSchedulers
@@ -140,11 +142,11 @@ abstract class DrawerActivity : InjectActivity() {
      * Send an request to change gif image with selected one.
      */
     @DebugLog
-    fun onGifSelected(photoSize: PhotoSize) {
+    fun onGifSelected(gif: Gif) {
         if (Application.sPeerId != null) {
-            updatePhotoSizeEntity(photoSize)
+            updateGifCache(gif)
 
-            Glide.with(this).load(photoSize.url).asGif().into(object : SimpleTarget<GifDrawable>() {
+            Glide.with(this).load(GifUrlProvider.getUrl(gif.photoSizes, Type.WEAR)).asGif().into(object : SimpleTarget<GifDrawable>() {
                 override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
                     // Convert GifDrawable to Asset.
                     val asset = createAssetFromDrawable(resource)
@@ -163,15 +165,16 @@ abstract class DrawerActivity : InjectActivity() {
     }
 
     /**
-     * Update PhotoSizeEntity table.
+     * Update GifCache table.
      */
-    private fun updatePhotoSizeEntity(photoSize: PhotoSize) {
-        mDb.insert(PhotoSizeEntity.TABLE, PhotoSizeEntity
+    private fun updateGifCache(gif: Gif) {
+        val updatedAt = System.currentTimeMillis()
+        mDb.insert(GifCache.TABLE, GifCache
                 .Builder()
-                .url(photoSize.url)
-                .width(photoSize.width)
-                .height(photoSize.height)
-                .updatedAt(System.currentTimeMillis())
+                .originalGifUrl(gif.originalGifUrl)
+                .photoSizes(gif.photoSizes)
+                .caption(gif.caption)
+                .updatedAt(updatedAt)
                 .build(), SQLiteDatabase.CONFLICT_REPLACE)
     }
 
