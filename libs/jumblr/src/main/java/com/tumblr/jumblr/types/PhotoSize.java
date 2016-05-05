@@ -6,7 +6,8 @@ package com.tumblr.jumblr.types;
  */
 public class PhotoSize {
 
-    private int width, height;
+    private int width;
+    private int height;
     private String url;
 
     public PhotoSize(String url, int width, int height) {

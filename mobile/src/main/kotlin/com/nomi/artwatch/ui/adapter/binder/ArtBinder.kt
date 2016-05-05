@@ -47,6 +47,11 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
                         val params = holder.mGifView.layoutParams
                         params.width = width
                         params.height = height
+
+                        if (holder.mGifDrawable != null) {
+                            holder.mGifDrawable?.recycle()
+                        }
+                        holder.mGifDrawable = resource
                         holder.mGifView.background = resource
 
                         resource.start()
@@ -65,6 +70,7 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var mPosition: Int = 0
+        var mGifDrawable: GifDrawable? = null
 
         val mGifView: GifImageView by bindView(R.id.gifView)
 
