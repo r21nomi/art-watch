@@ -63,6 +63,7 @@ class MainActivity : DrawerActivity() {
         super.onCreate(savedInstanceState)
 
         initBlogList()
+        mArtView.init(Action1 { photoSize -> onGifSelected(photoSize) })
     }
 
     /**
@@ -93,8 +94,9 @@ class MainActivity : DrawerActivity() {
                 .subscribe({user ->
                     if (!user.blogs.isEmpty()) {
                         mCurrentBlogName = user.blogs[0].name
-                        showGifs()
                     }
+                    // AdapterView.OnItemSelectedListener#onItemSelected will be called and then,
+                    // showGifs will be executed.
                     mBlogAdapter?.setDataSet(user.blogs)
                     mSpinner.adapter = mBlogAdapter
 
@@ -136,7 +138,7 @@ class MainActivity : DrawerActivity() {
                 .getPhotoPost(mCurrentBlogName)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ items ->
-                    mArtView.init(toPhotoSize(items), Action1 { photoSize -> onGifSelected(photoSize) })
+                    mArtView.setDataSet(toPhotoSize(items))
                     toggleEmptyView(items.isEmpty())
 
                 }, { throwable ->

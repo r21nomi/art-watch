@@ -47,6 +47,7 @@ class HistoryActivity : DrawerActivity() {
         super.onCreate(savedInstanceState)
 
         mSpinner.visibility = View.GONE
+        mArtView.init(Action1 { photoSize -> onGifSelected(photoSize) })
 
         fetchHistoryItems()
     }
@@ -59,7 +60,7 @@ class HistoryActivity : DrawerActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({photoList ->
                     if (photoList.isNotEmpty()) {
-                        mArtView.init(photoList, Action1 { photoSize -> onGifSelected(photoSize) })
+                        mArtView.setDataSet(photoList)
 
                     } else {
                         toggleEmptyView(true)
