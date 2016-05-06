@@ -9,12 +9,14 @@ import android.widget.AdapterView
 import android.widget.TextView
 import butterknife.bindView
 import com.nomi.artwatch.R
+import com.nomi.artwatch.data.entity.Gif
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.PostModel
 import com.nomi.artwatch.ui.adapter.binder.BlogAdapter
 import com.nomi.artwatch.ui.view.ArtView
+import com.nomi.artwatch.GifUrlProvider
+import com.nomi.artwatch.GifUrlProvider.Type
 import com.tumblr.jumblr.types.Photo
-import com.tumblr.jumblr.types.PhotoSize
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Action1
@@ -138,7 +140,7 @@ class MainActivity : DrawerActivity() {
                 .getPhotoPost(mCurrentBlogName)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ items ->
-                    mArtView.setDataSet(toPhotoSize(items))
+                    mArtView.setDataSet(toGif(items))
                     toggleEmptyView(items.isEmpty())
 
                 }, { throwable ->
@@ -147,10 +149,13 @@ class MainActivity : DrawerActivity() {
         mSubscriptionsOnDestroy.add(subscription)
     }
 
-    private fun toPhotoSize(list: List<Photo>): List<PhotoSize> {
+    /**
+     * To Gif entity.
+     */
+    private fun toGif(list: List<Photo>): List<Gif> {
         return Observable
                 .from(list)
-                .map { it.originalSize }
+                .map { Gif(GifUrlProvider.getUrl(it.sizes, Type.MOBILE), it.sizes, it.caption) }
                 .toList()
                 .toBlocking()
                 .single()

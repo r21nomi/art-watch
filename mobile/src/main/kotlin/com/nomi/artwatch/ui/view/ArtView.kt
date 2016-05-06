@@ -4,8 +4,8 @@ import android.content.Context
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
+import com.nomi.artwatch.data.entity.Gif
 import com.nomi.artwatch.ui.adapter.binder.ArtBinder
-import com.tumblr.jumblr.types.PhotoSize
 import com.yqritc.recyclerviewmultipleviewtypesadapter.ListBindAdapter
 import rx.functions.Action1
 
@@ -16,9 +16,9 @@ class ArtView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     private var mAdapter: ListBindAdapter = ListBindAdapter()
     private var mArtBinder: ArtBinder? = null
-    private var mOnSelect: Action1<PhotoSize>? = null
+    private var mOnSelect: Action1<Gif>? = null
 
-    fun init(onSelect: Action1<PhotoSize>) {
+    fun init(onSelect: Action1<Gif>) {
         mAdapter = ListBindAdapter()
         mOnSelect = onSelect
 
@@ -32,8 +32,8 @@ class ArtView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         adapter = mAdapter
     }
 
-    fun setDataSet(photoSizes: List<PhotoSize>) {
-        mArtBinder?.setDataSet(photoSizes)
+    fun setDataSet(gifs: List<Gif>) {
+        mArtBinder?.setDataSet(gifs)
         mArtBinder?.notifyBinderDataSetChanged()
     }
 }

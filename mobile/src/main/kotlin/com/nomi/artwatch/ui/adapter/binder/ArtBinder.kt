@@ -10,8 +10,8 @@ import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.SimpleTarget
 import com.nomi.artwatch.R
+import com.nomi.artwatch.data.entity.Gif
 import com.nomi.artwatch.util.WindowUtil
-import com.tumblr.jumblr.types.PhotoSize
 import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBindAdapter
 import com.yqritc.recyclerviewmultipleviewtypesadapter.DataBinder
 import pl.droidsonroids.gif.GifImageView
@@ -22,9 +22,9 @@ import java.util.*
  * Created by Ryota Niinomi on 15/11/8.
  */
 class ArtBinder(dataBindAdapter: DataBindAdapter,
-                private val mListener: Action1<PhotoSize>?) : DataBinder<ArtBinder.ViewHolder>(dataBindAdapter) {
+                private val mListener: Action1<Gif>?) : DataBinder<ArtBinder.ViewHolder>(dataBindAdapter) {
 
-    private val mDataSet: MutableList<PhotoSize> = ArrayList()
+    private val mDataSet: MutableList<Gif> = ArrayList()
 
     override fun newViewHolder(parent: ViewGroup): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_art, parent, false)
@@ -38,7 +38,7 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
         holder.mPosition = position
 
         Glide.with(holder.mGifView.context)
-                .load(photoSize.url)
+                .load(photoSize.originalGifUrl)
                 .asGif()
                 .into(object : SimpleTarget<GifDrawable>() {
                     override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
@@ -58,9 +58,9 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
         return mDataSet.size
     }
 
-    fun setDataSet(photoSizes: List<PhotoSize>) {
+    fun setDataSet(gifs: List<Gif>) {
         mDataSet.clear()
-        mDataSet.addAll(photoSizes)
+        mDataSet.addAll(gifs)
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
