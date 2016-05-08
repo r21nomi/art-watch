@@ -64,6 +64,16 @@
         </RelativeLayout>
 
         <TextView
+            android:id="@+id/topButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/top_button_label"
+            android:textSize="@dimen/font_size_14sp"
+            android:textColor="@color/black"
+            android:padding="@dimen/margin_16dp"
+            android:layout_marginTop="@dimen/margin_16dp"/>
+
+        <TextView
             android:id="@+id/historyButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
