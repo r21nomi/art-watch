@@ -274,7 +274,11 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                                                         GlideAnimation<? super GifDrawable> glideAnimation) {
                                 mShouldAnimateGif = true;
                                 mGifResource = resource;
-                                mGifImageView.setBackground(mGifResource);
+                                if (mGifImageView.getVisibility() == View.GONE) {
+                                    showGifImage();
+                                } else {
+                                    mGifImageView.setBackground(mGifResource);
+                                }
                                 startGifAnimate();
                             }
 
@@ -324,14 +328,18 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         private void startGifAnimate() {
             if (mGifResource != null) {
                 mShouldAnimateGif = true;
+                mIsSleeping = false;
                 mGifResource.start();
                 startTimer();
+                // Start drawing.
+                postInvalidate();
             }
         }
 
         private void stopGifAnimate() {
             if (mGifResource != null) {
                 mShouldAnimateGif = false;
+                mIsSleeping = true;
                 mGifResource.stop();
                 stopTimer();
             }
@@ -349,9 +357,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    mIsSleeping = false;
-                    // Start drawing.
-                    postInvalidate();
                 }
             });
             animator.start();
@@ -372,7 +377,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                     mGifImageView.setVisibility(View.GONE);
                     // Change background image to hide GifImageView.
                     mGifImageView.setBackground(new ColorDrawable(ContextCompat.getColor(getApplicationContext(), R.color.black)));
-                    mIsSleeping = true;
                     // Apply changes.
                     postInvalidate();
                     Log.d(this.getClass().getCanonicalName(), " Gif image has been hidden.");
