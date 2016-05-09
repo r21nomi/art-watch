@@ -82,9 +82,10 @@ abstract class DrawerActivity : InjectActivity() {
     val mSpinner: AppCompatSpinner by bindView(R.id.spinner)
     val mContainer: ViewGroup by bindView(R.id.container)
     val mUserThumb: ImageView by bindView(R.id.userThumb)
-    val mUserName: TextView by bindView( R.id.userName)
-    val mLogoutBtn: TextView by bindView(R.id.logoutButton)
+    val mUserName: TextView by bindView(R.id.userName)
+    val mTopBtn: TextView by bindView(R.id.topButton)
     val mHistoryBtn: TextView by bindView(R.id.historyButton)
+    val mLogoutBtn: TextView by bindView(R.id.logoutButton)
 
     protected abstract val layout: Int
     protected abstract val toolbarName: Int
@@ -210,12 +211,16 @@ abstract class DrawerActivity : InjectActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setHomeButtonEnabled(true)
 
-        mLogoutBtn.setOnClickListener({
-            logout()
+        mTopBtn.setOnClickListener({
+            startTopActivity()
         })
 
         mHistoryBtn.setOnClickListener({
             startHistoryActivity()
+        })
+
+        mLogoutBtn.setOnClickListener({
+            logout()
         })
 
         // User info
@@ -241,6 +246,13 @@ abstract class DrawerActivity : InjectActivity() {
                 .setNegativeButton("Cancel", null)
                 .create()
                 .show()
+    }
+
+    private fun startTopActivity() {
+        mDrawerLayout.closeDrawer(GravityCompat.START)
+        val intent: Intent = MainActivity.createIntent(this)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
     }
 
     private fun startHistoryActivity() {
