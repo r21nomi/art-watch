@@ -3,6 +3,7 @@ package com.nomi.artwatch.ui.activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -23,9 +24,8 @@ import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.SimpleTarget
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.wearable.Asset
-import com.google.android.gms.wearable.PutDataMapRequest
-import com.google.android.gms.wearable.Wearable
+import com.google.android.gms.common.api.ResultCallback
+import com.google.android.gms.wearable.*
 import com.nomi.artwatch.Application
 import com.nomi.artwatch.GifUrlProvider
 import com.nomi.artwatch.GifUrlProvider.Type
@@ -50,6 +50,8 @@ abstract class DrawerActivity : InjectActivity() {
     companion object {
         private val PATH_OF_GIF = "/gif"
         private val KEY_GIF = "gif"
+        private val SCHEME = "wear"
+        private val PATH_WITH_FEATURE = "/gif/latest"
     }
 
     private var mGoogleApiClient: GoogleApiClient? = null
@@ -59,11 +61,31 @@ abstract class DrawerActivity : InjectActivity() {
         override fun onConnected(connectionHint: Bundle?) {
             if (Application.sPeerId != null) {
                 Timber.d("Connected to wear.")
+                val builder = Uri.Builder()
+                val uri = builder.scheme(SCHEME).path(PATH_WITH_FEATURE).authority(Application.sPeerId).build()
+                Wearable.DataApi.getDataItem(mGoogleApiClient, uri).setResultCallback(mResultCallback)
             }
         }
 
         override fun onConnectionSuspended(cause: Int) {
             // TODO：Handling
+        }
+    }
+
+    /**
+     * Callback from wear.
+     */
+    private val mResultCallback = object : ResultCallback<DataApi.DataItemResult> {
+        override fun onResult(dataItemResult: DataApi.DataItemResult) {
+            if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
+                val configDataItem = dataItemResult.getDataItem()
+                val dataMapItem = DataMapItem.fromDataItem(configDataItem)
+                val config = dataMapItem.dataMap
+                Timber.d("ResultCallback : success");
+
+            } else {
+                Timber.d("ResultCallback : error");
+            }
         }
     }
 
