@@ -28,6 +28,7 @@ import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
@@ -80,11 +81,9 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 for (DataEvent event : dataEvents) {
                     if (event.getType() == DataEvent.TYPE_CHANGED &&
                             event.getDataItem().getUri().getPath().equals(PATH_OF_GIF)) {
-
                         DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                        Asset asset = dataMapItem.getDataMap().getAsset(KEY_GIF);
-                        // Change Gif image.
-                        changeGifWithAsset(asset);
+                        DataMap dataMap = dataMapItem.getDataMap();
+                        applyDataMap(dataMap);
                     }
                 }
             }
@@ -94,6 +93,15 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             @Override
             public void onConnected(Bundle connectionHint) {
                 Wearable.DataApi.addListener(mGoogleApiClient, mDataListener);
+
+                // Fetch gif image saved onto storage.
+                WatchFaceUtil.fetchConfigDataMap(mGoogleApiClient, resultDataMap -> {
+                    if (resultDataMap != null) {
+                        applyDataMap(resultDataMap);
+                    } else if (mGifImageView != null) {
+                        mGifImageView.setBackgroundResource(R.drawable.img_default);
+                    }
+                });
             }
 
             @Override
@@ -128,7 +136,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
             mGifImageView = (GifImageView)inflater.inflate(R.layout.gif_view, null).findViewById(R.id.gifView);
             mGifImageView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            mGifImageView.setBackgroundResource(R.drawable.img_default);
 
             // Enable onTapCommand.
             setWatchFaceStyle(new WatchFaceStyle.Builder(ArtWatchFace.this)
@@ -191,7 +198,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-            Log.d(this.getClass().getCanonicalName(), "onDraw");
+            Log.v(this.getClass().getCanonicalName(), "onDraw");
 
             int widthSpec = View.MeasureSpec.makeMeasureSpec(bounds.width(), View.MeasureSpec.EXACTLY);
             int heightSpec = View.MeasureSpec.makeMeasureSpec(bounds.height(), View.MeasureSpec.EXACTLY);
@@ -218,6 +225,26 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                     mGoogleApiClient.disconnect();
                 }
             }
+        }
+
+        /**
+         * Apply data map.
+         * By this process, gif image will be shown.
+         *
+         * @param dataMap
+         */
+        private void applyDataMap(DataMap dataMap) {
+            Asset asset = dataMap.getAsset(KEY_GIF);
+            // Change Gif image.
+            changeGifWithAsset(asset);
+            // Save data onto storage.
+            WatchFaceUtil.putConfigDataItem(mGoogleApiClient, dataMap, resultDataMap -> {
+                if (resultDataMap != null) {
+                    Log.d(this.getClass().getCanonicalName(), "Config data item has successfully saved.");
+                } else {
+                    Log.d(this.getClass().getCanonicalName(), "Config data item has not saved by any reason.");
+                }
+            });
         }
 
         /**
