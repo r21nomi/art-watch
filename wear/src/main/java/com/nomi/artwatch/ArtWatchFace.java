@@ -209,7 +209,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             if (!mIsSleeping) {
                 // CanvasWatchFaceService#onDraw will be called.
                 // If mIsSleeping == true, do not draw.
-                postInvalidate();
+                invalidate();
             }
         }
 
@@ -359,7 +359,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 mGifResource.start();
                 startTimer();
                 // Start drawing.
-                postInvalidate();
+                invalidate();
             }
         }
 
@@ -405,7 +405,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                     // Change background image to hide GifImageView.
                     mGifImageView.setBackground(new ColorDrawable(ContextCompat.getColor(getApplicationContext(), R.color.black)));
                     // Apply changes.
-                    postInvalidate();
+                    invalidate();
                     Log.d(this.getClass().getCanonicalName(), " Gif image has been hidden.");
                 }
             });
