@@ -8,14 +8,14 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.TextView
 import butterknife.bindView
+import com.nomi.artwatch.GifUrlProvider
+import com.nomi.artwatch.GifUrlProvider.Type
 import com.nomi.artwatch.R
 import com.nomi.artwatch.data.entity.Gif
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.PostModel
 import com.nomi.artwatch.ui.adapter.binder.BlogAdapter
 import com.nomi.artwatch.ui.view.ArtView
-import com.nomi.artwatch.GifUrlProvider
-import com.nomi.artwatch.GifUrlProvider.Type
 import com.tumblr.jumblr.types.Photo
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -80,7 +80,7 @@ class MainActivity : DrawerActivity() {
                     startActivity(Intent("android.intent.action.VIEW", Uri.parse(authUrl)))
 
                 }, { throwable ->
-                    Timber.w(throwable, throwable.message)
+                    Timber.e(throwable, throwable.message)
                 })
         mSubscriptionsOnDestroy.add(subscription)
     }
@@ -93,7 +93,7 @@ class MainActivity : DrawerActivity() {
         val subscription = mUserModel
                 .user
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({user ->
+                .subscribe({ user ->
                     if (!user.blogs.isEmpty()) {
                         mCurrentBlogName = user.blogs[0].name
                     }
@@ -102,8 +102,8 @@ class MainActivity : DrawerActivity() {
                     mBlogAdapter?.setDataSet(user.blogs)
                     mSpinner.adapter = mBlogAdapter
 
-                }, {throwable ->
-                    Timber.e(throwable.message, throwable)
+                }, { throwable ->
+                    Timber.e(throwable, throwable.message)
                 })
         mSubscriptionsOnDestroy.add(subscription)
 
@@ -144,7 +144,7 @@ class MainActivity : DrawerActivity() {
                     toggleEmptyView(items.isEmpty())
 
                 }, { throwable ->
-                    Timber.w(throwable, throwable.message)
+                    Timber.e(throwable, throwable.message)
                 })
         mSubscriptionsOnDestroy.add(subscription)
     }

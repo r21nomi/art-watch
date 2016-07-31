@@ -41,7 +41,7 @@ public class PostModel extends BaseModel {
                     subject.onNext(blog);
 
                 }, throwable -> {
-                    Timber.w(throwable, throwable.getLocalizedMessage());
+                    Timber.e(throwable, throwable.getLocalizedMessage());
                     subject.onError(throwable);
 
                 }, subject::onCompleted);
@@ -61,7 +61,7 @@ public class PostModel extends BaseModel {
                     subject.onNext(null);
 
                 }, throwable -> {
-                    Timber.w(throwable, throwable.getLocalizedMessage());
+                    Timber.e(throwable, throwable.getLocalizedMessage());
                     subject.onError(throwable);
 
                 }, subject::onCompleted);
@@ -82,7 +82,7 @@ public class PostModel extends BaseModel {
                     subject.onNext(photos);
 
                 }, throwable -> {
-                    Timber.w(throwable, throwable.getLocalizedMessage());
+                    Timber.e(throwable, throwable.getLocalizedMessage());
                     subject.onError(throwable);
 
                 }, subject::onCompleted);

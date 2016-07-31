@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 
 import rx.Observable;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by Ryota Niinomi on 2016/03/23.
@@ -27,6 +28,7 @@ public class BlogModel extends BaseModel {
                     return "https://api.tumblr.com/v2/blog/" + blogName + ".tumblr.com/avatar";
                 })
                 .onErrorResumeNext(throwable -> {
+                    Timber.e(throwable, throwable.getLocalizedMessage());
                     return Observable.just("");
                 });
     }

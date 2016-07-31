@@ -65,8 +65,9 @@ public class LoginModel {
                     try {
                         authUrl = provider.retrieveRequestToken(consumer, CALLBACK_URL);
 
-                    } catch (Exception e) {
-                        return Observable.error(e);
+                    } catch (Throwable throwable) {
+                        Timber.e(throwable, throwable.getLocalizedMessage());
+                        return Observable.error(throwable);
                     }
                     return Observable.just(authUrl);
                 });
@@ -85,8 +86,9 @@ public class LoginModel {
                         provider.retrieveAccessToken(consumer, oauthVerifier);
                         mPrefModel.setTokens(consumer.getToken(), consumer.getTokenSecret());
 
-                    } catch (Exception e) {
-                        return Observable.error(e);
+                    } catch (Throwable throwable) {
+                        Timber.e(throwable, throwable.getLocalizedMessage());
+                        return Observable.error(throwable);
                     }
                     return Observable.just(null);
                 });

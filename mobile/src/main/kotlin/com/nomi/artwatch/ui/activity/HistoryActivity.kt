@@ -66,7 +66,7 @@ class HistoryActivity : DrawerActivity() {
                         toggleEmptyView(true)
                     }
                 }, {throwable ->
-                    Timber.e(throwable.message)
+                    Timber.e(throwable, throwable.message)
                     toggleEmptyView(true)
                 })
         mSubscriptionsOnDestroy.add(subscription)

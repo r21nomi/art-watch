@@ -249,11 +249,11 @@ abstract class DrawerActivity : InjectActivity() {
         val subscription = mUserModel
                 .user
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({user ->
+                .subscribe({ user ->
                     setUserThumb()
                     mUserName.text = user.name
-                }, {throwable ->
-                    Timber.e(throwable.message, throwable)
+                }, { throwable ->
+                    Timber.e(throwable, throwable.message)
                 })
         mSubscriptionsOnDestroy.add(subscription)
     }
@@ -287,11 +287,13 @@ abstract class DrawerActivity : InjectActivity() {
         val subscription = mBlogModel
                 .getAvatar("ryotaniinomi")
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({url ->
+                .subscribe({ url ->
                     Glide.with(this)
                             .load(url)
                             .bitmapTransform(CropCircleTransformation(this))
                             .into(mUserThumb)
+                }, { throwable ->
+                    Timber.e(throwable, throwable.message)
                 })
         mSubscriptionsOnDestroy.add(subscription)
     }
