@@ -79,6 +79,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             Log.d(this.getClass().getCanonicalName(), "Time has passed. Gif image is hidden.");
             stopGifAnimate();
             hideGifImage();
+            startUpdateTimer();
             invalidate();
         };
         private Runnable mGifAnimateRunnable = () -> {
