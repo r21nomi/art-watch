@@ -32,14 +32,14 @@ class SplashActivity : InjectActivity() {
 
         val subscription = setToken()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({aVoid ->
+                .subscribe({ aVoid ->
                     if (mLoginModel.isAuthorized) {
                         moveToMain()
                     } else {
                         moveToLogin()
                     }
-                }, {throwable ->
-                    Timber.e(throwable.message, throwable)
+                }, { throwable ->
+                    Timber.e(throwable, throwable.message)
                 })
         mSubscriptionsOnDestroy.add(subscription)
     }

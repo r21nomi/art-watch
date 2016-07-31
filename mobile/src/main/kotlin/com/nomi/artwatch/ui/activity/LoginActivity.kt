@@ -60,7 +60,7 @@ class LoginActivity : InjectActivity() {
                     startActivity(Intent("android.intent.action.VIEW", Uri.parse(authUrl)))
 
                 }, { throwable ->
-                    Timber.w(throwable, throwable.message)
+                    Timber.e(throwable, throwable.message)
                 })
         mSubscriptionsOnDestroy.add(subscription)
     }

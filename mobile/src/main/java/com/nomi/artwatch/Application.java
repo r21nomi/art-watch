@@ -7,6 +7,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.nomi.artwatch.di.component.ApplicationComponent;
 import com.nomi.artwatch.di.component.DaggerApplicationComponent;
 import com.nomi.artwatch.di.module.ApplicationModule;
+import com.nomi.artwatch.ui.util.CrashReportingTree;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.io.InputStream;
@@ -44,7 +45,7 @@ public class Application extends android.app.Application {
 
     private void init() {
         Config.init(this);
-        Timber.plant(new Timber.DebugTree());
+        Timber.plant(new CrashReportingTree());
 
         Glide glide = Glide.get(this);
         glide.setMemoryCategory(MemoryCategory.LOW);

@@ -6,6 +6,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath 'com.google.gms:google-services:3.0.0'
     }
 }
 
@@ -25,5 +26,6 @@ ext {
     VERSION_NAME = "1.0"
     SUPPORT_LIBRARY_VERSION = "23.1.1"
     SUPPORT_WEARABLE_VERSION = "1.3.0"
-    PLAY_SERVICES_VERSION = "8.4.0"
+    PLAY_SERVICES_VERSION = "9.2.1"
+    FIREBASE_VERSION = "9.2.1"
 }

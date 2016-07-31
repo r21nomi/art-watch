@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "136077539938",
+    "firebase_url": "https://art-wear.firebaseio.com",
+    "project_id": "art-wear",
+    "storage_bucket": "art-wear.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136077539938:android:db6594cc064cdedb",
+        "android_client_info": {
+          "package_name": "com.nomi.artwatch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "136077539938-lut00h6gf7nm04pleaocqeqr3p87fvc3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb54MXL-gOVVLfXQl5xiHLKrlA8OPj6Rs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
