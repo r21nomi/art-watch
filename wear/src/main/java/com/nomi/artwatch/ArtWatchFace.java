@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.wearable.watchface.CanvasWatchFaceService;
-import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -41,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import pl.droidsonroids.gif.GifImageView;
@@ -53,7 +53,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
 
     private static final long GIF_ANIMATE_DURATION = 100;
     private static final long HIDE_GIF_IMAGE_TIMER_MS = TimeUnit.SECONDS.toMillis(30);
-    private static final long UPDATE_TIMER_MS = TimeUnit.SECONDS.toMillis(60);
     private static final String PATH_OF_GIF = "/gif";
     private static final String KEY_GIF = "gif";
     private static final String COLON_STRING = ":";
@@ -66,40 +65,30 @@ public class ArtWatchFace extends CanvasWatchFaceService {
     private class Engine extends CanvasWatchFaceService.Engine {
         private Handler mSleepHandler = new Handler();
         private Handler mGifAnimateHandler = new Handler();
-        private Handler mUpdateTimeHandler = new Handler();
-        private boolean mAmbient;
-        private boolean mLowBitAmbient;
         private GifImageView mGifImageView;
         private GifDrawable mGifResource;
         private boolean mIsSleeping;
-        private boolean mShouldAnimateGif;
+        private Calendar mCalendar;
+        private Date mDate;
+        private Paint mBackgroundPaint;
+        private Paint mHourPaint;
+        private Paint mMinutePaint;
+        private Paint mColonPaint;
+        private float mTimeX;
+        private float mTimeY;
 
         private Runnable mSleepRunnable = () -> {
             // Hide gif image
             Log.d(this.getClass().getCanonicalName(), "Time has passed. Gif image is hidden.");
             stopGifAnimate();
             hideGifImage();
-            startUpdateTimer();
             invalidate();
         };
+
         private Runnable mGifAnimateRunnable = () -> {
             invalidate();
             startGifAnimateTimer();
         };
-        private Runnable mUpdateTimeRunnable = () -> {
-            invalidate();
-            startUpdateTimer();
-        };
-
-        private Calendar mCalendar;
-        private Date mDate;
-        private Paint mBackgroundPaint;
-        private Paint mDatePaint;
-        private Paint mHourPaint;
-        private Paint mMinutePaint;
-        private Paint mColonPaint;
-        private float mTimeX;
-        private float mTimeY;
 
         private DataApi.DataListener mDataListener = new DataApi.DataListener() {
             /**
@@ -178,34 +167,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         }
 
         @Override
-        public void onTapCommand(@TapType int tapType, int x, int y, long eventTime) {
-            Log.d(this.getClass().getCanonicalName(), "onTapCommand, tapType : " + tapType);
-
-            switch (tapType) {
-                case WatchFaceService.TAP_TYPE_TAP:
-                    // This will not be called if swiped.
-                    if (mGifImageView.getVisibility() == View.GONE) {
-                        showGifImage();
-                        startGifAnimate();
-
-                    } else {
-                        toggleGifAnimateState();
-                    }
-                    break;
-
-                case WatchFaceService.TAP_TYPE_TOUCH:
-                    break;
-
-                case WatchFaceService.TAP_TYPE_TOUCH_CANCEL:
-                    break;
-
-                default:
-                    super.onTapCommand(tapType, x, y, eventTime);
-                    break;
-            }
-        }
-
-        @Override
         public void onDestroy() {
             super.onDestroy();
         }
@@ -213,14 +174,16 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         @Override
         public void onPropertiesChanged(Bundle properties) {
             super.onPropertiesChanged(properties);
-            mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
         }
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            if (mAmbient != inAmbientMode) {
-                mAmbient = inAmbientMode;
+            Log.v(this.getClass().getCanonicalName(), "onAmbientModeChanged");
+
+            if (!isInAmbientMode() && mGifImageView.getVisibility() == View.GONE) {
+                showGifImage();
+                startGifAnimate();
             }
         }
 
@@ -228,16 +191,23 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             Log.v(this.getClass().getCanonicalName(), "onDraw");
 
-            if (mIsSleeping) {
-                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+            if (!mIsSleeping) {
+                int widthSpec = View.MeasureSpec.makeMeasureSpec(bounds.width(), View.MeasureSpec.EXACTLY);
+                int heightSpec = View.MeasureSpec.makeMeasureSpec(bounds.height(), View.MeasureSpec.EXACTLY);
+                mGifImageView.measure(widthSpec, heightSpec);
+                mGifImageView.layout(0, 0, bounds.width(), bounds.height());
+                mGifImageView.draw(canvas);
 
+            } else {
+                // Draw the background.
+                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+            }
+
+            if (isInAmbientMode()) {
                 boolean is24Hour = DateFormat.is24HourFormat(ArtWatchFace.this);
                 long now = System.currentTimeMillis();
                 mCalendar.setTimeInMillis(now);
                 mDate.setTime(now);
-
-                // Draw the background.
-                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
                 // Draw the hours.
                 String hourString;
@@ -265,22 +235,18 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 // Draw the minutes.
                 String minuteString = formatTwoDigitNumber(mCalendar.get(Calendar.MINUTE));
                 canvas.drawText(minuteString, x, y, mMinutePaint);
-
-            } else {
-                int widthSpec = View.MeasureSpec.makeMeasureSpec(bounds.width(), View.MeasureSpec.EXACTLY);
-                int heightSpec = View.MeasureSpec.makeMeasureSpec(bounds.height(), View.MeasureSpec.EXACTLY);
-                mGifImageView.measure(widthSpec, heightSpec);
-                mGifImageView.layout(0, 0, bounds.width(), bounds.height());
-                mGifImageView.draw(canvas);
             }
         }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
+            Log.v(this.getClass().getCanonicalName(), "onVisibilityChanged");
 
             if (visible) {
                 mGoogleApiClient.connect();
+                mCalendar.setTimeZone(TimeZone.getDefault());
+
             } else {
                 if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
                     Wearable.DataApi.removeListener(mGoogleApiClient, mDataListener);
@@ -289,9 +255,17 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             }
         }
 
+        @Override
+        public void onTimeTick() {
+            super.onTimeTick();
+            Log.v(this.getClass().getCanonicalName(), "onTimeTick");
+
+            invalidate();
+        }
+
         private void initGif() {
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-            mGifImageView = (GifImageView)inflater.inflate(R.layout.gif_view, null).findViewById(R.id.gifView);
+            mGifImageView = (GifImageView) inflater.inflate(R.layout.gif_view, null).findViewById(R.id.gifView);
             mGifImageView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         }
 
@@ -299,7 +273,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             Resources resources = ArtWatchFace.this.getResources();
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(ContextCompat.getColor(getApplicationContext(), R.color.black));
-            mDatePaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
             mHourPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
             mMinutePaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
             mColonPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
@@ -384,7 +357,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                             @Override
                             public void onResourceReady(com.bumptech.glide.load.resource.gif.GifDrawable resource,
                                                         GlideAnimation<? super GifDrawable> glideAnimation) {
-                                mShouldAnimateGif = true;
                                 mGifResource = resource;
                                 if (mGifImageView.getVisibility() == View.GONE) {
                                     showGifImage();
@@ -413,10 +385,10 @@ public class ArtWatchFace extends CanvasWatchFaceService {
          */
         private byte[] toByteArray(InputStream inputStream) throws IOException {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            byte [] buffer = new byte[1024];
-            while(true) {
+            byte[] buffer = new byte[1024];
+            while (true) {
                 int len = inputStream.read(buffer);
-                if(len < 0) {
+                if (len < 0) {
                     break;
                 }
                 bout.write(buffer, 0, len);
@@ -424,22 +396,8 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             return bout.toByteArray();
         }
 
-        /**
-         * Toggle animate state for gif image.
-         */
-        private void toggleGifAnimateState() {
-            mShouldAnimateGif = !mShouldAnimateGif;
-
-            if (mShouldAnimateGif) {
-                startGifAnimate();
-            } else {
-                stopGifAnimate();
-            }
-        }
-
         private void startGifAnimate() {
             if (mGifResource != null) {
-                mShouldAnimateGif = true;
                 mIsSleeping = false;
                 mGifResource.start();
                 startSleepTimer();
@@ -450,7 +408,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
 
         private void stopGifAnimate() {
             if (mGifResource != null) {
-                mShouldAnimateGif = false;
                 mIsSleeping = true;
                 mGifResource.stop();
                 stopSleepTimer();
@@ -463,7 +420,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             mGifImageView.setBackground(mGifResource);
             ValueAnimator animator = ValueAnimator.ofInt(0, 255).setDuration(300);
             animator.addUpdateListener(animation -> {
-                int num = (int)animation.getAnimatedValue();
+                int num = (int) animation.getAnimatedValue();
                 mGifImageView.setImageAlpha(num);
             });
             animator.addListener(new AnimatorListenerAdapter() {
@@ -478,7 +435,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         private void hideGifImage() {
             ValueAnimator animator = ValueAnimator.ofInt(255, 0).setDuration(300);
             animator.addUpdateListener(animation -> {
-                int num = (int)animation.getAnimatedValue();
+                int num = (int) animation.getAnimatedValue();
                 // TODO：To be faded out because it's not faded out now.
                 mGifImageView.setImageAlpha(num);
             });
@@ -529,15 +486,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
 
         private void stopGifAnimateTimer() {
             mGifAnimateHandler.removeCallbacks(mGifAnimateRunnable);
-        }
-
-        private void startUpdateTimer() {
-            stopUpdateTimer();
-            mUpdateTimeHandler.postDelayed(mUpdateTimeRunnable, UPDATE_TIMER_MS);
-        }
-
-        private void stopUpdateTimer() {
-            mUpdateTimeHandler.removeCallbacks(mUpdateTimeRunnable);
         }
     }
 }
