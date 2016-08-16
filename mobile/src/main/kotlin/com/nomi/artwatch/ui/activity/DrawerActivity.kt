@@ -54,7 +54,7 @@ abstract class DrawerActivity : InjectActivity() {
         private val PATH_WITH_FEATURE = "/gif/latest"
     }
 
-    private var mGoogleApiClient: GoogleApiClient? = null
+    protected var mGoogleApiClient: GoogleApiClient? = null
     private var mDrawerToggle: ActionBarDrawerToggle? = null
 
     private val mGoogleConnectionCallback = object : GoogleApiClient.ConnectionCallbacks {
@@ -107,6 +107,7 @@ abstract class DrawerActivity : InjectActivity() {
     val mUserName: TextView by bindView(R.id.userName)
     val mTopBtn: TextView by bindView(R.id.topButton)
     val mHistoryBtn: TextView by bindView(R.id.historyButton)
+    val mSettingsBtn: TextView by bindView(R.id.settingsButton)
     val mLogoutBtn: TextView by bindView(R.id.logoutButton)
 
     protected abstract val layout: Int
@@ -241,6 +242,10 @@ abstract class DrawerActivity : InjectActivity() {
             startHistoryActivity()
         })
 
+        mSettingsBtn.setOnClickListener({
+            startSettingsActivity()
+        })
+
         mLogoutBtn.setOnClickListener({
             logout()
         })
@@ -280,6 +285,12 @@ abstract class DrawerActivity : InjectActivity() {
     private fun startHistoryActivity() {
         mDrawerLayout.closeDrawer(GravityCompat.START)
         val intent: Intent = HistoryActivity.createIntent(this)
+        startActivity(intent)
+    }
+
+    private fun startSettingsActivity() {
+        mDrawerLayout.closeDrawer(GravityCompat.START)
+        val intent: Intent = SettingActivity.createIntent(this)
         startActivity(intent)
     }
 

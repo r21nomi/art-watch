@@ -22,15 +22,33 @@ import rx.functions.Action1;
 public class WatchFaceUtil {
 
     private static final String SCHEME = "wear";
-    private static final String PATH_WITH_FEATURE = "/gif/latest";
+    private static final String PATH_WITH_FEATURE_LATEST_GIF = "/gif/latest";
+    private static final String PATH_WITH_FEATURE_GIF_TIMEOUT = "/gif/timeout";
+
+    public static void fetchGifDataMap(GoogleApiClient client, Action1<DataMap> callback) {
+        fetchConfigDataMap(client, PATH_WITH_FEATURE_LATEST_GIF, callback);
+    }
+
+    public static void fetchTimeoutDataMap(GoogleApiClient client, Action1<DataMap> callback) {
+        fetchConfigDataMap(client, PATH_WITH_FEATURE_GIF_TIMEOUT, callback);
+    }
+
+    public static void putGifData(GoogleApiClient googleApiClient, DataMap newConfig, Action1<DataMap> callback) {
+        putConfigDataItem(googleApiClient, newConfig, PATH_WITH_FEATURE_LATEST_GIF, callback);
+    }
+
+    public static void putTimeoutData(GoogleApiClient googleApiClient, DataMap newConfig, Action1<DataMap> callback) {
+        putConfigDataItem(googleApiClient, newConfig, PATH_WITH_FEATURE_GIF_TIMEOUT, callback);
+    }
 
     /**
      * Fetch data item from the storage via using Wearable.DataApi.
      *
      * @param client
+     * @param path
      * @param callback
      */
-    public static void fetchConfigDataMap(GoogleApiClient client, Action1<DataMap> callback) {
+    private static void fetchConfigDataMap(GoogleApiClient client, String path, Action1<DataMap> callback) {
         Log.d(WatchFaceUtil.class.getCanonicalName(), "fetchConfigDataMap start");
 
         Wearable.NodeApi.getLocalNode(client).setResultCallback(new ResultCallback<NodeApi.GetLocalNodeResult>() {
@@ -39,7 +57,7 @@ public class WatchFaceUtil {
                 String localNode = getLocalNodeResult.getNode().getId();
                 Uri uri = new Uri.Builder()
                         .scheme(SCHEME)
-                        .path(PATH_WITH_FEATURE)
+                        .path(path)
                         .authority(localNode)
                         .build();
 
@@ -71,12 +89,16 @@ public class WatchFaceUtil {
      *
      * @param googleApiClient
      * @param newConfig
+     * @param path
      * @param callback
      */
-    public static void putConfigDataItem(GoogleApiClient googleApiClient, DataMap newConfig, Action1<DataMap> callback) {
+    private static void putConfigDataItem(GoogleApiClient googleApiClient,
+                                         DataMap newConfig,
+                                         String path,
+                                         Action1<DataMap> callback) {
         Log.d(WatchFaceUtil.class.getCanonicalName(), "putConfigDataItem start");
 
-        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(PATH_WITH_FEATURE);
+        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(path);
         putDataMapRequest.setUrgent();
         DataMap configToPut = putDataMapRequest.getDataMap();
         configToPut.putAll(newConfig);

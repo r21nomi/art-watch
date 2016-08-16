@@ -5,6 +5,7 @@ import com.nomi.artwatch.di.module.ActivityModule;
 import com.nomi.artwatch.ui.activity.HistoryActivity;
 import com.nomi.artwatch.ui.activity.LoginActivity;
 import com.nomi.artwatch.ui.activity.MainActivity;
+import com.nomi.artwatch.ui.activity.SettingActivity;
 import com.nomi.artwatch.ui.activity.SplashActivity;
 
 import dagger.Component;
@@ -24,4 +25,5 @@ public interface ActivityComponent {
     void inject(LoginActivity activity);
     void inject(MainActivity activity);
     void inject(HistoryActivity activity);
+    void inject(SettingActivity activity);
 }

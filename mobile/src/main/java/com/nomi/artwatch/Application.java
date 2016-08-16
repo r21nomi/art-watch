@@ -45,6 +45,7 @@ public class Application extends android.app.Application {
 
     private void init() {
         Config.init(this);
+        Timber.plant(new Timber.DebugTree());
         Timber.plant(new CrashReportingTree());
 
         Glide glide = Glide.get(this);

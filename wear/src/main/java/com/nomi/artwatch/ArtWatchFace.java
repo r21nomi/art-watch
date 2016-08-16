@@ -52,9 +52,11 @@ import timber.log.Timber;
 public class ArtWatchFace extends CanvasWatchFaceService {
 
     private static final long GIF_ANIMATE_DURATION = 100;
-    private static final long HIDE_GIF_IMAGE_TIMER_MS = TimeUnit.SECONDS.toMillis(30);
+    private static final int HIDE_GIF_IMAGE_TIMER_MS = (int) TimeUnit.SECONDS.toMillis(30);
     private static final String PATH_OF_GIF = "/gif";
+    private static final String PATH_OF_TIMEOUT = "/timeout";
     private static final String KEY_GIF = "gif";
+    private static final String KEY_TIMEOUT = "timeout";
     private static final String COLON_STRING = ":";
 
     @Override
@@ -68,6 +70,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         private GifImageView mGifImageView;
         private GifDrawable mGifResource;
         private boolean mIsSleeping;
+        private long mTimeout = HIDE_GIF_IMAGE_TIMER_MS;
         private Calendar mCalendar;
         private Date mDate;
         private Paint mBackgroundPaint;
@@ -100,11 +103,18 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             @Override
             public void onDataChanged(DataEventBuffer dataEvents) {
                 for (DataEvent event : dataEvents) {
-                    if (event.getType() == DataEvent.TYPE_CHANGED &&
-                            event.getDataItem().getUri().getPath().equals(PATH_OF_GIF)) {
-                        DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                        DataMap dataMap = dataMapItem.getDataMap();
-                        applyDataMap(dataMap);
+                    if (event.getType() == DataEvent.TYPE_CHANGED) {
+                        if (event.getDataItem().getUri().getPath().equals(PATH_OF_GIF)) {
+                            DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+                            DataMap dataMap = dataMapItem.getDataMap();
+                            applyGifDataMap(dataMap);
+
+                        } else if (event.getDataItem().getUri().getPath().equals(PATH_OF_TIMEOUT)) {
+                            DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+                            DataMap dataMap = dataMapItem.getDataMap();
+                            applyTimeoutDataMap(dataMap);
+                            Log.d(this.getClass().getCanonicalName(), "Timeout : " + mTimeout);
+                        }
                     }
                 }
             }
@@ -115,15 +125,21 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             public void onConnected(Bundle connectionHint) {
                 Wearable.DataApi.addListener(mGoogleApiClient, mDataListener);
 
-                // Fetch gif image saved onto storage.
-                WatchFaceUtil.fetchConfigDataMap(mGoogleApiClient, resultDataMap -> {
+                // Fetch gif image from storage.
+                WatchFaceUtil.fetchGifDataMap(mGoogleApiClient, resultDataMap -> {
                     if (resultDataMap != null) {
-                        applyDataMap(resultDataMap);
+                        applyGifDataMap(resultDataMap);
+
                     } else if (mGifImageView != null) {
-//                        mGifImageView.setBackgroundResource(R.drawable.img_default);
-//                        startGifAnimateTimer();
-//                        startSleepTimer();
+                        // Set default image.
                         changeGif(getResources().openRawResource(R.raw.img_default));
+                    }
+                });
+
+                // Fetch timeout count from storage.
+                WatchFaceUtil.fetchTimeoutDataMap(mGoogleApiClient, resultDataMap -> {
+                    if (resultDataMap != null) {
+                        mTimeout = resultDataMap.getLong(KEY_TIMEOUT);
                     }
                 });
             }
@@ -291,16 +307,38 @@ public class ArtWatchFace extends CanvasWatchFaceService {
          *
          * @param dataMap
          */
-        private void applyDataMap(DataMap dataMap) {
+        private void applyGifDataMap(DataMap dataMap) {
             Asset asset = dataMap.getAsset(KEY_GIF);
             // Change Gif image.
             changeGifWithAsset(asset);
             // Save data onto storage.
-            WatchFaceUtil.putConfigDataItem(mGoogleApiClient, dataMap, resultDataMap -> {
+            saveGifData(dataMap);
+        }
+
+        private void applyTimeoutDataMap(DataMap dataMap) {
+            mTimeout = dataMap.getLong(KEY_TIMEOUT);
+
+            showGifImage();
+            startGifAnimate();
+            saveTimeoutData(dataMap);
+        }
+
+        private void saveGifData(DataMap dataMap) {
+            WatchFaceUtil.putGifData(mGoogleApiClient, dataMap, resultDataMap -> {
                 if (resultDataMap != null) {
-                    Log.d(this.getClass().getCanonicalName(), "Config data item has successfully saved.");
+                    Log.d(this.getClass().getCanonicalName(), "Gif data item has successfully saved.");
                 } else {
-                    Log.d(this.getClass().getCanonicalName(), "Config data item has not saved by any reason.");
+                    Log.d(this.getClass().getCanonicalName(), "Gif data item has not saved by any reason.");
+                }
+            });
+        }
+
+        private void saveTimeoutData(DataMap dataMap) {
+            WatchFaceUtil.putTimeoutData(mGoogleApiClient, dataMap, resultDataMap -> {
+                if (resultDataMap != null) {
+                    Log.d(this.getClass().getCanonicalName(), "Timeout data item has successfully saved.");
+                } else {
+                    Log.d(this.getClass().getCanonicalName(), "Timeout data item has not saved by any reason.");
                 }
             });
         }
@@ -472,7 +510,10 @@ public class ArtWatchFace extends CanvasWatchFaceService {
          */
         private void startSleepTimer() {
             stopSleepTimer();
-            mSleepHandler.postDelayed(mSleepRunnable, HIDE_GIF_IMAGE_TIMER_MS);
+
+            if (mTimeout > 0) {
+                mSleepHandler.postDelayed(mSleepRunnable, mTimeout);
+            }
         }
 
         private void stopSleepTimer() {

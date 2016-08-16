@@ -83,13 +83,24 @@
             android:padding="@dimen/margin_16dp"/>
 
         <TextView
+            android:id="@+id/settingsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_button_label"
+            android:textSize="@dimen/font_size_14sp"
+            android:textColor="@color/black"
+            android:padding="@dimen/margin_16dp"/>
+
+        <TextView
             android:id="@+id/logoutButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/logout_button_label"
             android:textSize="@dimen/font_size_14sp"
             android:textColor="@color/black"
-            android:padding="@dimen/margin_16dp"
+            android:paddingTop="@dimen/margin_8dp"
+            android:paddingLeft="@dimen/margin_16dp"
+            android:paddingBottom="@dimen/margin_8dp"
             />
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

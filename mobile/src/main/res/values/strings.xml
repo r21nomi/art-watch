@@ -5,9 +5,13 @@
     <string name="font_light" translatable="false">fonts/mplus-1c-light.ttf</string>
 
     <string name="history" translatable="false">History</string>
+    <string name="settings" translatable="false">Settings</string>
     <string name="login_tumblr" translatable="false">Login to Tumblr</string>
     <string name="top_button_label" translatable="false">Top</string>
     <string name="history_button_label" translatable="false">History</string>
+    <string name="settings_button_label" translatable="false">Settings</string>
     <string name="logout_button_label" translatable="false">Logout</string>
     <string name="no_gifs">No Gifs</string>
+
+    <string name="settings_timeout_title" translatable="false">Timeout</string>
 </resources>
