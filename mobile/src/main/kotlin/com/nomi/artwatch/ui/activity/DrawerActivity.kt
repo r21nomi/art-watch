@@ -112,6 +112,14 @@ abstract class DrawerActivity : InjectActivity() {
 
     protected abstract val layout: Int
     protected abstract val toolbarName: Int
+    
+    open fun getGoogleConnectionCallback() : GoogleApiClient.ConnectionCallbacks {
+        return mGoogleConnectionCallback
+    }
+
+    open fun getGoogleConnectionFailedListener() : GoogleApiClient.OnConnectionFailedListener {
+        return mGoogleConnectionFailedListener
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -191,14 +199,6 @@ abstract class DrawerActivity : InjectActivity() {
                 }
             })
         }
-    }
-
-    open fun getGoogleConnectionCallback() : GoogleApiClient.ConnectionCallbacks {
-        return mGoogleConnectionCallback
-    }
-
-    open fun getGoogleConnectionFailedListener() : GoogleApiClient.OnConnectionFailedListener {
-        return mGoogleConnectionFailedListener
     }
 
     /**
