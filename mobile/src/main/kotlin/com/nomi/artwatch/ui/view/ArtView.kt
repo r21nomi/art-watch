@@ -34,6 +34,6 @@ class ArtView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     fun setDataSet(gifs: List<Gif>) {
         mArtBinder?.setDataSet(gifs)
-        mArtBinder?.notifyBinderDataSetChanged()
+        mArtBinder?.notifyDataSetChanged()
     }
 }
