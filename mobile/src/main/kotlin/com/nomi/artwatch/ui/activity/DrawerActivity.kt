@@ -48,13 +48,13 @@ import javax.inject.Inject
 abstract class DrawerActivity : InjectActivity() {
 
     companion object {
+        val SCHEME = "wear"
         private val PATH_OF_GIF = "/gif"
         private val KEY_GIF = "gif"
-        private val SCHEME = "wear"
-        private val PATH_WITH_FEATURE = "/gif/latest"
+        private val PATH_WITH_FEATURE_LATEST_GIF = "/gif/latest"
     }
 
-    private var mGoogleApiClient: GoogleApiClient? = null
+    protected var mGoogleApiClient: GoogleApiClient? = null
     private var mDrawerToggle: ActionBarDrawerToggle? = null
 
     private val mGoogleConnectionCallback = object : GoogleApiClient.ConnectionCallbacks {
@@ -62,8 +62,8 @@ abstract class DrawerActivity : InjectActivity() {
             if (Application.sPeerId != null) {
                 Timber.d("Connected to wear.")
                 val builder = Uri.Builder()
-                val uri = builder.scheme(SCHEME).path(PATH_WITH_FEATURE).authority(Application.sPeerId).build()
-                Wearable.DataApi.getDataItem(mGoogleApiClient, uri).setResultCallback(mResultCallback)
+                val featureGifUri = builder.scheme(SCHEME).path(PATH_WITH_FEATURE_LATEST_GIF).authority(Application.sPeerId).build()
+                Wearable.DataApi.getDataItem(mGoogleApiClient, featureGifUri).setResultCallback(mResultCallback)
             }
         }
 
@@ -81,10 +81,10 @@ abstract class DrawerActivity : InjectActivity() {
                 val configDataItem = dataItemResult.getDataItem()
                 val dataMapItem = DataMapItem.fromDataItem(configDataItem)
                 val config = dataMapItem.dataMap
-                Timber.d("ResultCallback : success");
+                Timber.d("ResultCallback : success")
 
             } else {
-                Timber.d("ResultCallback : error");
+                Timber.d("ResultCallback : error")
             }
         }
     }
@@ -107,10 +107,19 @@ abstract class DrawerActivity : InjectActivity() {
     val mUserName: TextView by bindView(R.id.userName)
     val mTopBtn: TextView by bindView(R.id.topButton)
     val mHistoryBtn: TextView by bindView(R.id.historyButton)
+    val mSettingsBtn: TextView by bindView(R.id.settingsButton)
     val mLogoutBtn: TextView by bindView(R.id.logoutButton)
 
     protected abstract val layout: Int
     protected abstract val toolbarName: Int
+    
+    open fun getGoogleConnectionCallback() : GoogleApiClient.ConnectionCallbacks {
+        return mGoogleConnectionCallback
+    }
+
+    open fun getGoogleConnectionFailedListener() : GoogleApiClient.OnConnectionFailedListener {
+        return mGoogleConnectionFailedListener
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,7 +129,12 @@ abstract class DrawerActivity : InjectActivity() {
             layoutInflater.inflate(layout, mContainer)
         }
 
-        mGoogleApiClient = GoogleApiClient.Builder(this).addConnectionCallbacks(mGoogleConnectionCallback).addOnConnectionFailedListener(mGoogleConnectionFailedListener).addApi(Wearable.API).build()
+        mGoogleApiClient = GoogleApiClient
+                .Builder(this)
+                .addConnectionCallbacks(getGoogleConnectionCallback())
+                .addOnConnectionFailedListener(getGoogleConnectionFailedListener())
+                .addApi(Wearable.API)
+                .build()
 
         initDrawer()
     }
@@ -241,6 +255,10 @@ abstract class DrawerActivity : InjectActivity() {
             startHistoryActivity()
         })
 
+        mSettingsBtn.setOnClickListener({
+            startSettingsActivity()
+        })
+
         mLogoutBtn.setOnClickListener({
             logout()
         })
@@ -280,6 +298,12 @@ abstract class DrawerActivity : InjectActivity() {
     private fun startHistoryActivity() {
         mDrawerLayout.closeDrawer(GravityCompat.START)
         val intent: Intent = HistoryActivity.createIntent(this)
+        startActivity(intent)
+    }
+
+    private fun startSettingsActivity() {
+        mDrawerLayout.closeDrawer(GravityCompat.START)
+        val intent: Intent = SettingActivity.createIntent(this)
         startActivity(intent)
     }
 

@@ -1,11 +1,11 @@
-<android.support.v4.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -16,80 +16,90 @@
             <android.support.v7.widget.AppCompatSpinner
                 android:id="@+id/spinner"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </android.support.v7.widget.Toolbar>
 
         <FrameLayout
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/toolbar"
-            />
+            android:layout_below="@+id/toolbar" />
     </RelativeLayout>
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="left|start"
         android:background="@color/white"
-        >
+        android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/drawer_image_height"
             android:background="@color/gray"
-            android:gravity="center"
-            android:padding="@dimen/margin_16dp"
             android:clipToPadding="true"
-            >
+            android:gravity="center"
+            android:padding="@dimen/margin_16dp">
 
             <ImageView
                 android:id="@+id/userThumb"
                 android:layout_width="@dimen/drawer_thumb_height"
                 android:layout_height="@dimen/drawer_thumb_height"
-                android:layout_centerVertical="true"
-                />
+                android:layout_centerVertical="true" />
 
             <TextView
                 android:id="@+id/userName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/font_size_16sp"
-                android:textColor="@color/black"
-                android:layout_toRightOf="@+id/userThumb"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/margin_8dp"
-                />
+                android:layout_toRightOf="@+id/userThumb"
+                android:textColor="@color/black"
+                android:textSize="@dimen/font_size_16sp" />
         </RelativeLayout>
 
         <TextView
             android:id="@+id/topButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/top_button_label"
-            android:textSize="@dimen/font_size_14sp"
-            android:textColor="@color/black"
+            android:layout_marginTop="@dimen/margin_16dp"
+            android:drawablePadding="@dimen/margin_16dp"
+            android:drawableStart="@drawable/ic_home_black_18dp"
             android:padding="@dimen/margin_16dp"
-            android:layout_marginTop="@dimen/margin_16dp"/>
+            android:text="@string/top_button_label"
+            android:textColor="@color/black"
+            android:textSize="@dimen/font_size_14sp" />
 
         <TextView
             android:id="@+id/historyButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/margin_16dp"
+            android:drawableStart="@drawable/ic_history_black_18dp"
+            android:padding="@dimen/margin_16dp"
             android:text="@string/history_button_label"
-            android:textSize="@dimen/font_size_14sp"
             android:textColor="@color/black"
-            android:padding="@dimen/margin_16dp"/>
+            android:textSize="@dimen/font_size_14sp" />
+
+        <TextView
+            android:id="@+id/settingsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/margin_16dp"
+            android:drawableStart="@drawable/ic_settings_black_18dp"
+            android:padding="@dimen/margin_16dp"
+            android:text="@string/settings_button_label"
+            android:textColor="@color/black"
+            android:textSize="@dimen/font_size_14sp" />
 
         <TextView
             android:id="@+id/logoutButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/logout_button_label"
-            android:textSize="@dimen/font_size_14sp"
-            android:textColor="@color/black"
+            android:layout_marginTop="@dimen/margin_16dp"
             android:padding="@dimen/margin_16dp"
-            />
+            android:text="@string/logout_button_label"
+            android:textColor="@color/black"
+            android:textSize="@dimen/font_size_14sp" />
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>
