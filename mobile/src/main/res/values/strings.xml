@@ -14,4 +14,9 @@
     <string name="no_gifs">No Gifs</string>
 
     <string name="settings_timeout_title" translatable="false">Timeout</string>
+    <string name="settings_timeout_30_sec" translatable="false">30 Sec</string>
+    <string name="settings_timeout_60_sec" translatable="false">60 Sec</string>
+    <string name="settings_timeout_90_sec" translatable="false">90 Sec</string>
+    <string name="settings_timeout_120_sec" translatable="false">120 Sec</string>
+    <string name="settings_timeout_infinite" translatable="false">Infinite</string>
 </resources>
