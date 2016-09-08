@@ -207,16 +207,27 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             Log.v(this.getClass().getCanonicalName(), "onDraw");
 
+            // Draw the background.
+            canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+
             if (!mIsSleeping) {
                 int widthSpec = View.MeasureSpec.makeMeasureSpec(bounds.width(), View.MeasureSpec.EXACTLY);
                 int heightSpec = View.MeasureSpec.makeMeasureSpec(bounds.height(), View.MeasureSpec.EXACTLY);
                 mGifImageView.measure(widthSpec, heightSpec);
-                mGifImageView.layout(0, 0, bounds.width(), bounds.height());
-                mGifImageView.draw(canvas);
 
-            } else {
-                // Draw the background.
-                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+                if (mGifResource != null) {
+                    // TODO：Centering
+                    mGifImageView.layout(
+                            0,
+                            0,
+                            bounds.width(),
+                            bounds.width() * mGifResource.getIntrinsicHeight() / mGifResource.getIntrinsicWidth()
+                    );
+                } else {
+                    mGifImageView.layout(0, 0, bounds.width(), bounds.height());
+                }
+
+                mGifImageView.draw(canvas);
             }
 
             if (isInAmbientMode()) {
