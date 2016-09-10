@@ -59,14 +59,14 @@
         </RelativeLayout>
 
         <TextView
-            android:id="@+id/topButton"
+            android:id="@+id/homeButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_16dp"
             android:drawablePadding="@dimen/margin_16dp"
             android:drawableStart="@drawable/ic_home_black_18dp"
             android:padding="@dimen/margin_16dp"
-            android:text="@string/top_button_label"
+            android:text="@string/home_button_label"
             android:textColor="@color/black"
             android:textSize="@dimen/font_size_14sp" />
 

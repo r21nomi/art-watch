@@ -105,7 +105,7 @@ abstract class DrawerActivity : InjectActivity() {
     val mContainer: ViewGroup by bindView(R.id.container)
     val mUserThumb: ImageView by bindView(R.id.userThumb)
     val mUserName: TextView by bindView(R.id.userName)
-    val mTopBtn: TextView by bindView(R.id.topButton)
+    val mHomeBtn: TextView by bindView(R.id.homeButton)
     val mHistoryBtn: TextView by bindView(R.id.historyButton)
     val mSettingsBtn: TextView by bindView(R.id.settingsButton)
     val mLogoutBtn: TextView by bindView(R.id.logoutButton)
@@ -244,11 +244,12 @@ abstract class DrawerActivity : InjectActivity() {
         mDrawerLayout.setDrawerListener(mDrawerToggle)
         mDrawerToggle!!.isDrawerIndicatorEnabled = true
 
+        supportActionBar!!.title = getString(toolbarName)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setHomeButtonEnabled(true)
 
-        mTopBtn.setOnClickListener({
-            startTopActivity()
+        mHomeBtn.setOnClickListener({
+            startHomeActivity()
         })
 
         mHistoryBtn.setOnClickListener({
@@ -288,7 +289,7 @@ abstract class DrawerActivity : InjectActivity() {
                 .show()
     }
 
-    private fun startTopActivity() {
+    private fun startHomeActivity() {
         mDrawerLayout.closeDrawer(GravityCompat.START)
         val intent: Intent = MainActivity.createIntent(this)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
