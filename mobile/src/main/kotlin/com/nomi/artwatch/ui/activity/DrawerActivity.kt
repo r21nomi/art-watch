@@ -112,6 +112,7 @@ abstract class DrawerActivity : InjectActivity() {
 
     protected abstract val layout: Int
     protected abstract val toolbarName: Int
+    protected abstract val shouldShowSpinner: Boolean
     
     open fun getGoogleConnectionCallback() : GoogleApiClient.ConnectionCallbacks {
         return mGoogleConnectionCallback
@@ -128,6 +129,8 @@ abstract class DrawerActivity : InjectActivity() {
         if (layout != 0) {
             layoutInflater.inflate(layout, mContainer)
         }
+
+        mSpinner.visibility = if (shouldShowSpinner) View.VISIBLE else View.GONE
 
         mGoogleApiClient = GoogleApiClient
                 .Builder(this)

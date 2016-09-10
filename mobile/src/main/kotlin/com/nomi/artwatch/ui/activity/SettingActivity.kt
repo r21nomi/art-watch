@@ -71,8 +71,8 @@ class SettingActivity : DrawerActivity() {
     }
 
     override val layout: Int get() = R.layout.activity_setting
-
     override val toolbarName: Int get() = R.string.settings
+    override val shouldShowSpinner: Boolean get() = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

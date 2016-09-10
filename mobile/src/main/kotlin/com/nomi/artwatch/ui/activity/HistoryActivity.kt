@@ -42,11 +42,11 @@ class HistoryActivity : DrawerActivity() {
 
     override val layout: Int get() = R.layout.activity_history
     override val toolbarName: Int get() = R.string.history
+    override val shouldShowSpinner: Boolean get() = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mSpinner.visibility = View.GONE
         mArtView.init(Action1 { gif -> onGifSelected(gif) })
 
         fetchHistoryItems()
