@@ -55,7 +55,8 @@ class MainActivity : DrawerActivity() {
     }
 
     override val layout: Int = R.layout.activity_main
-    override val toolbarName: Int = R.string.app_name
+    override val toolbarName: Int = R.string.home
+    override val shouldShowSpinner: Boolean get() = true
 
     override fun injectDependency(component: ActivityComponent) {
         component.inject(this)
