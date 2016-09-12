@@ -28,4 +28,14 @@ ext {
     SUPPORT_WEARABLE_VERSION = "1.3.0"
     PLAY_SERVICES_VERSION = "9.2.1"
     FIREBASE_VERSION = "9.2.1"
+    KOTLIN_VERSION = '1.0.1'
+
+    signingConfigs = {
+        release {
+            storeFile file(String.valueOf(System.getenv("ANDROID_KEY_STORE_FILE")))
+            storePassword System.getenv("ANDROID_KEY_STORE_PASSWORD")
+            keyAlias System.getenv("ANDROID_KEY_ALIAS")
+            keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+        }
+    }
 }
