@@ -5,6 +5,7 @@ apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'android-apt'
 apply plugin: 'com.jakewharton.hugo'
+apply plugin: 'com.github.triplet.play'
 
 buildscript {
     repositories {
@@ -65,6 +66,11 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+}
+
+play {
+    track = 'alpha'
+    jsonFile = file('google_play_service_account_key.json')
 }
 
 dependencies {
