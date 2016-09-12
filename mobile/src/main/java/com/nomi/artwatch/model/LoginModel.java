@@ -1,8 +1,12 @@
 package com.nomi.artwatch.model;
 
+import android.content.Context;
 import android.net.Uri;
 
+import com.nomi.artwatch.Application;
 import com.nomi.artwatch.Config;
+import com.nomi.artwatch.R;
+import com.nomi.artwatch.ui.util.DeepLinkRouter;
 import com.nomi.artwatch.util.StringUtil;
 
 import javax.inject.Inject;
@@ -24,8 +28,8 @@ public class LoginModel {
     private static final String REQUEST_TOKEN_URL = "https://www.tumblr.com/oauth/request_token";
     private static final String ACCESS_TOKEN_URL = "https://www.tumblr.com/oauth/access_token";
     private static final String AUTH_URL = "https://www.tumblr.com/oauth/authorize";
-    private static final String CALLBACK_URL = "artwatch://com.nomi.artwatch";
 
+    private Context mContext;
     private PrefModel mPrefModel;
     private CommonsHttpOAuthConsumer consumer = new CommonsHttpOAuthConsumer(
             Config.CONSUMER_KEY,
@@ -36,7 +40,8 @@ public class LoginModel {
             AUTH_URL);
 
     @Inject
-    public LoginModel(PrefModel prefModel) {
+    public LoginModel(Context context, PrefModel prefModel) {
+        mContext = context;
         mPrefModel = prefModel;
     }
 
@@ -63,7 +68,7 @@ public class LoginModel {
                 .flatMap(aVoid -> {
                     String authUrl = "";
                     try {
-                        authUrl = provider.retrieveRequestToken(consumer, CALLBACK_URL);
+                        authUrl = provider.retrieveRequestToken(consumer, getCallbackUrl());
 
                     } catch (Throwable throwable) {
                         Timber.e(throwable, throwable.getLocalizedMessage());
@@ -78,8 +83,8 @@ public class LoginModel {
                 .just(null)
                 .subscribeOn(Schedulers.io())
                 .flatMap(aVoid -> {
-                    if (!uri.toString().startsWith(CALLBACK_URL)) {
-                        return Observable.error(new IllegalArgumentException("The callback should be started from " + CALLBACK_URL));
+                    if (!uri.toString().startsWith(getCallbackUrl())) {
+                        return Observable.error(new IllegalArgumentException("The callback should be started from " + getCallbackUrl()));
                     }
                     try {
                         String oauthVerifier = uri.getQueryParameter(OAuth.OAUTH_VERIFIER);
@@ -97,5 +102,17 @@ public class LoginModel {
     public Observable<Void> logout() {
         mPrefModel.clear();
         return Observable.just(null);
+    }
+
+    private String getCallbackUrl() {
+        String url = mContext.getString(R.string.scheme)
+                + "://"
+                + DeepLinkRouter.Companion.getLOGIN()
+                + "/"
+                + Application.sPeerId;
+
+        Timber.d("getCallbackUrl : %s", url);
+
+        return url;
     }
 }

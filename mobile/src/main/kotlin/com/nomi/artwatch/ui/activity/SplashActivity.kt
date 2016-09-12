@@ -1,12 +1,15 @@
 package com.nomi.artwatch.ui.activity
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.wearable.companion.WatchFaceCompanion
 import com.nomi.artwatch.Application
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.LoginModel
+import com.nomi.artwatch.ui.util.DeepLinkRouter
+import com.nomi.artwatch.util.StringUtil
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
@@ -28,14 +31,26 @@ class SplashActivity : InjectActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        Application.sPeerId = intent.getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID)
+        if (intent.hasExtra(WatchFaceCompanion.EXTRA_PEER_ID)) {
+            Application.setPeerId(intent.getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID))
+        }
+
+        Timber.d("Application.sPeerId : " + Application.sPeerId)
 
         val subscription = setToken()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ aVoid ->
                     if (mLoginModel.isAuthorized) {
-                        moveToMain()
+                        val data = intent.data
+                        if (data != null && StringUtil.isNotEmpty(data.host)) {
+                            // Deep link
+                            startDeepLink(data)
+                        } else {
+                            // To Main
+                            moveToMain()
+                        }
                     } else {
+                        // Login
                         moveToLogin()
                     }
                 }, { throwable ->
@@ -66,6 +81,17 @@ class SplashActivity : InjectActivity() {
     private fun moveToMain() {
         val intent = MainActivity.createIntent(this)
         startActivity(intent)
-        finish();
+        finish()
+    }
+
+    private fun startDeepLink(uri: Uri) {
+        val subscription = DeepLinkRouter
+                .createIntent(this, uri)
+                .subscribe({
+                    intent -> startActivity(intent)
+                }, {
+                    throwable -> Timber.e(throwable, throwable.message)
+                })
+        mSubscriptionsOnDestroy.add(subscription)
     }
 }
