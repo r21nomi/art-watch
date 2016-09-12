@@ -24,6 +24,10 @@ public class Application extends android.app.Application {
     private ApplicationComponent mApplicationComponent;
     public static String sPeerId = null;
 
+    public static void setPeerId(String peerId) {
+        sPeerId = peerId;
+    }
+
     @Inject
     OkHttpClient mOkHttpClient;
 

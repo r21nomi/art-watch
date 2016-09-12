@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">ART WATCH</string>
+    <string name="scheme" translatable="false">artwatch</string>
     <string name="consumer_key" translatable="false">XnszYK25nU8PKMnoHdGS9GTmj0lHr2JIT3ZfhPDhGfEh6pZdQg</string>
     <string name="consumer_secret" translatable="false">sfxAAfBtIjhE420CpCvjwNNqe7klVMvALDy4yJ9DcPwCLOikTn</string>
     <string name="font_light" translatable="false">fonts/mplus-1c-light.ttf</string>
