@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.0'
         classpath 'com.google.gms:google-services:3.0.0'
+        classpath 'com.github.triplet.gradle:play-publisher:1.1.5'
     }
 }
 
@@ -22,8 +23,8 @@ ext {
     BUILDTOOLS_VERSION = "23.0.1"
     MIN_SDK_VERSION = 21
     TARGET_SDK_VERSION = 23
-    VERSION_CODE = 1
-    VERSION_NAME = "1.0"
+    VERSION_CODE = getVersion()
+    VERSION_NAME = "1.0." + getPatchVersion()
     SUPPORT_LIBRARY_VERSION = "23.1.1"
     SUPPORT_WEARABLE_VERSION = "1.3.0"
     PLAY_SERVICES_VERSION = "9.2.1"
@@ -38,4 +39,16 @@ ext {
             keyPassword System.getenv("ANDROID_KEY_PASSWORD")
         }
     }
+}
+
+def getVersion() {
+    def build = System.getenv("TAG_NUMBER")
+    if (build == null) {
+        return 1
+    }
+    return build.toInteger()
+}
+
+def getPatchVersion() {
+    return getVersion()
 }
