@@ -26,4 +26,6 @@ deployment:
   release:
     tag: /v[0-9]+(\.[0-9]+)*/
     commands:
+      - export TAG_NUMBER="$CIRCLE_TAG" | sed -e "s/v//"
       - ./gradlew assembleRelease -PpreDexEnable=false -Pcom.android.build.threadPoolSize=1 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" -Dorg.gradle.daemon=false
+      - ./scripts/release.sh mobile/build/outputs/apk/mobile-release.apk mobile-release.apk
