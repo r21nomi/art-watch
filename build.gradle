@@ -24,7 +24,7 @@ ext {
     MIN_SDK_VERSION = 21
     TARGET_SDK_VERSION = 23
     VERSION_CODE = getVersion()
-    VERSION_NAME = "1.0." + getPatchVersion()
+    VERSION_NAME = getVersionName()
     SUPPORT_LIBRARY_VERSION = "23.1.1"
     SUPPORT_WEARABLE_VERSION = "1.3.0"
     PLAY_SERVICES_VERSION = "9.2.1"
@@ -41,14 +41,38 @@ ext {
     }
 }
 
+/**
+ * Get version from versionName
+ * ex. If versionName is v1.1.2, the version will be 4.
+ *
+ * @return
+ */
 def getVersion() {
-    def build = System.getenv("TAG_NUMBER")
-    if (build == null) {
-        return 1
+    def numbers = getVersionName().split(/\./)
+    int number = 0
+
+    for (i in numbers) {
+        number += i.toInteger()
     }
-    return build.toInteger()
+    return number
 }
 
-def getPatchVersion() {
-    return getVersion()
+/**
+ * Get versionName as String exclude "v".
+ *
+ * @return
+ */
+def getVersionName() {
+    def tag = System.getenv("TAG_NAME")
+    if (tag == null) {
+        return "1.0.0"
+    }
+    return tag.minus("v")
+}
+
+task printVersions {
+    doLast {
+        println "versionName : " + getVersionName()
+        println "version : " + getVersion()
+    }
 }
