@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">ArtWatch</string>
-    <string name="my_analog_name">Art Watch</string>
-    <string name="hello_round">Hello Round World!</string>
-    <string name="hello_square">Hello Square World!</string>
+    <string name="app_name">ART WATCH</string>
+    <string name="my_analog_name">@string/app_name</string>
 </resources>
