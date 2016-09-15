@@ -10,6 +10,7 @@ machine:
     version: oraclejdk8
   environment:
     ANDROID_HOME: /usr/local/android-sdk-linux
+    TAG_NAME: $CIRCLE_TAG
 #    JAVA_OPTS: "-Xms512m -Xmx1024m"
 #    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
 
@@ -26,6 +27,5 @@ deployment:
   release:
     tag: /v[0-9]+(\.[0-9]+)*/
     commands:
-      - export TAG_NAME="$CIRCLE_TAG" | sed -e "s/v//"
       - ./gradlew assembleRelease -PpreDexEnable=false -Pcom.android.build.threadPoolSize=1 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" -Dorg.gradle.daemon=false
       - ./scripts/release.sh mobile/build/outputs/apk/mobile-release.apk mobile-release.apk
