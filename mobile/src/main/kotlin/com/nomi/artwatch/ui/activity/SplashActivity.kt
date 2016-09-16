@@ -23,6 +23,8 @@ class SplashActivity : InjectActivity() {
     @Inject
     lateinit var mLoginModel: LoginModel
 
+    var mMainIntent: Intent? = null
+
     override fun injectDependency(component: ActivityComponent) {
         component.inject(this)
     }
@@ -30,6 +32,10 @@ class SplashActivity : InjectActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
+
+        // FIXME：DeepLinkRouter内でIntentを作成すると、たまにNoClassDefFoundErrorが発生するので
+        // MainActivityの起動Intentはここで作成する。
+        mMainIntent = MainActivity.createIntent(this)
 
         if (intent.hasExtra(WatchFaceCompanion.EXTRA_PEER_ID)) {
             Application.setPeerId(intent.getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID))
@@ -86,7 +92,7 @@ class SplashActivity : InjectActivity() {
 
     private fun startDeepLink(uri: Uri) {
         val subscription = DeepLinkRouter
-                .createIntent(this, uri)
+                .createIntent(mMainIntent!!, uri)
                 .subscribe({
                     intent -> startActivity(intent)
                 }, {
