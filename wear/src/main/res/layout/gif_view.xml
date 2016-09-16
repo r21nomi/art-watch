@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:wearable="http://schemas.android.com/apk/res-auto"
+<android.support.wearable.view.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -15,9 +15,7 @@
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/time_x"
-        android:layout_marginTop="@dimen/time_y"
         android:textColor="@color/white"
         android:textSize="@dimen/font_size_time"
-        wearable:layout_box="left|top" />
-</FrameLayout>
+        app:layout_box="top|left" />
+</android.support.wearable.view.BoxInsetLayout>

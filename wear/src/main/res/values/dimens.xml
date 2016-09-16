@@ -3,6 +3,7 @@
     <dimen name="analog_hand_stroke">3dp</dimen>
     <dimen name="time_x">12dp</dimen>
     <dimen name="time_y">32dp</dimen>
+    <dimen name="time_x_round">48dp</dimen>
 
     <dimen name="font_size_time">20sp</dimen>
 </resources>

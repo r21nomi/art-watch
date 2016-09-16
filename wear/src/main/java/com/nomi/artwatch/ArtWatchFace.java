@@ -6,7 +6,6 @@ import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -19,6 +18,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -47,7 +48,6 @@ import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
 public class ArtWatchFace extends CanvasWatchFaceService {
 
@@ -77,6 +77,8 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         private View mRootView;
         private GifImageView mGifImageView;
         private TextView mTimeView;
+
+        private boolean mIsRound;
 
         private Runnable mSleepRunnable = () -> {
             // Hide gif image
@@ -117,6 +119,15 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 }
             }
         };
+
+        @Override
+        public void onApplyWindowInsets(WindowInsets insets) {
+            super.onApplyWindowInsets(insets);
+
+            mIsRound = insets.isRound();
+
+            Log.d(this.getClass().getCanonicalName(), "isRound : " + mIsRound);
+        }
 
         private GoogleApiClient.ConnectionCallbacks mGoogleConnectionCallback = new GoogleApiClient.ConnectionCallbacks() {
             @Override
@@ -223,6 +234,8 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             } else {
                 mRootView.layout(0, 0, bounds.width(), bounds.height());
             }
+
+            setMarginToTimeView();
 
             mGifImageView.setVisibility(mIsSleeping ? View.GONE : View.VISIBLE);
             mRootView.draw(canvas);
@@ -350,7 +363,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         private void changeGifWithAsset(Asset asset) {
             getInputStreamFromAsset(asset)
                     .subscribe(this::changeGif, throwable -> {
-                        Timber.e(throwable.getLocalizedMessage(), throwable);
+                        Log.e(this.getClass().getCanonicalName(), throwable.getLocalizedMessage());
                     });
         }
 
@@ -374,7 +387,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                         return Observable.just(assetInputStream);
                     })
                     .onErrorResumeNext(throwable -> {
-                        Timber.e(throwable.getLocalizedMessage(), throwable);
+                        Log.e(this.getClass().getCanonicalName(), throwable.getLocalizedMessage());
                         return Observable.error(throwable);
                     })
                     .observeOn(AndroidSchedulers.mainThread());
@@ -405,11 +418,11 @@ public class ArtWatchFace extends CanvasWatchFaceService {
 
                             @Override
                             public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                Timber.e(e.getLocalizedMessage(), e);
+                                Log.e(this.getClass().getCanonicalName(), e.getLocalizedMessage());
                             }
                         });
             } catch (IOException e) {
-                Timber.e(e.getLocalizedMessage(), e);
+                Log.e(this.getClass().getCanonicalName(), e.getLocalizedMessage());
             }
         }
 
@@ -492,12 +505,23 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             animator.start();
         }
 
-        private Paint createTextPaint(int defaultInteractiveColor) {
-            Paint paint = new Paint();
-            paint.setColor(defaultInteractiveColor);
-            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
-            paint.setAntiAlias(true);
-            return paint;
+        private void setMarginToTimeView() {
+            int leftRes;
+
+            if (mIsRound) {
+                leftRes = R.dimen.time_x_round;
+            } else {
+                leftRes = R.dimen.time_x;
+            }
+
+            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mTimeView.getLayoutParams();
+            layoutParams.setMargins(
+                    getResources().getDimensionPixelSize(leftRes),
+                    getResources().getDimensionPixelSize(R.dimen.time_y),
+                    0,
+                    0
+            );
+            mTimeView.setLayoutParams(layoutParams);
         }
 
         private String formatTwoDigitNumber(int hour) {
