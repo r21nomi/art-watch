@@ -3,7 +3,6 @@ package com.nomi.artwatch;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -20,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -57,7 +57,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
     private static final String PATH_OF_TIMEOUT = "/timeout";
     private static final String KEY_GIF = "gif";
     private static final String KEY_TIMEOUT = "timeout";
-    private static final String COLON_STRING = ":";
+    private static final String COLON_STRING = " : ";
 
     @Override
     public Engine onCreateEngine() {
@@ -67,18 +67,16 @@ public class ArtWatchFace extends CanvasWatchFaceService {
     private class Engine extends CanvasWatchFaceService.Engine {
         private Handler mSleepHandler = new Handler();
         private Handler mGifAnimateHandler = new Handler();
-        private GifImageView mGifImageView;
         private GifDrawable mGifResource;
         private boolean mIsSleeping;
         private long mTimeout = HIDE_GIF_IMAGE_TIMER_MS;
         private Calendar mCalendar;
         private Date mDate;
         private Paint mBackgroundPaint;
-        private Paint mHourPaint;
-        private Paint mMinutePaint;
-        private Paint mColonPaint;
-        private float mTimeX;
-        private float mTimeY;
+
+        private View mRootView;
+        private GifImageView mGifImageView;
+        private TextView mTimeView;
 
         private Runnable mSleepRunnable = () -> {
             // Hide gif image
@@ -210,25 +208,24 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             // Draw the background.
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
-            if (!mIsSleeping) {
-                int widthSpec = View.MeasureSpec.makeMeasureSpec(bounds.width(), View.MeasureSpec.EXACTLY);
-                int heightSpec = View.MeasureSpec.makeMeasureSpec(bounds.height(), View.MeasureSpec.EXACTLY);
-                mGifImageView.measure(widthSpec, heightSpec);
+            int widthSpec = View.MeasureSpec.makeMeasureSpec(bounds.width(), View.MeasureSpec.EXACTLY);
+            int heightSpec = View.MeasureSpec.makeMeasureSpec(bounds.height(), View.MeasureSpec.EXACTLY);
+            mRootView.measure(widthSpec, heightSpec);
 
-                if (mGifResource != null) {
-                    // TODO：Centering
-                    mGifImageView.layout(
-                            0,
-                            0,
-                            bounds.width(),
-                            bounds.width() * mGifResource.getIntrinsicHeight() / mGifResource.getIntrinsicWidth()
-                    );
-                } else {
-                    mGifImageView.layout(0, 0, bounds.width(), bounds.height());
-                }
-
-                mGifImageView.draw(canvas);
+            if (mGifResource != null) {
+                // TODO：Centering
+                mRootView.layout(
+                        0,
+                        0,
+                        bounds.width(),
+                        bounds.width() * mGifResource.getIntrinsicHeight() / mGifResource.getIntrinsicWidth()
+                );
+            } else {
+                mRootView.layout(0, 0, bounds.width(), bounds.height());
             }
+
+            mGifImageView.setVisibility(mIsSleeping ? View.GONE : View.VISIBLE);
+            mRootView.draw(canvas);
 
             if (isInAmbientMode()) {
                 boolean is24Hour = DateFormat.is24HourFormat(ArtWatchFace.this);
@@ -248,20 +245,16 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                     }
                     hourString = String.valueOf(hour);
                 }
-                float x = mTimeX;
-                float y = mTimeY;
 
-                // Draw the hours.
-                canvas.drawText(hourString, x, y, mHourPaint);
-                x += mHourPaint.measureText(hourString) + 5;
+                if (mTimeView.getVisibility() != View.VISIBLE) {
+                    mTimeView.setVisibility(View.VISIBLE);
+                }
 
-                // Draw the colon.
-                canvas.drawText(COLON_STRING, x, y, mColonPaint);
-                x += (mColonPaint.measureText(COLON_STRING) + 5);
-
-                // Draw the minutes.
                 String minuteString = formatTwoDigitNumber(mCalendar.get(Calendar.MINUTE));
-                canvas.drawText(minuteString, x, y, mMinutePaint);
+                mTimeView.setText(hourString + COLON_STRING + minuteString);
+
+            } else {
+                mTimeView.setVisibility(View.GONE);
             }
         }
 
@@ -292,24 +285,19 @@ public class ArtWatchFace extends CanvasWatchFaceService {
 
         private void initGif() {
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-            mGifImageView = (GifImageView) inflater.inflate(R.layout.gif_view, null).findViewById(R.id.gifView);
+            View rootView = inflater.inflate(R.layout.gif_view, null);
+            mGifImageView = (GifImageView) rootView.findViewById(R.id.gifView);
             mGifImageView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
+            mRootView = rootView;
+            mTimeView = (TextView) rootView.findViewById(R.id.time);
         }
 
         private void initTime() {
-            Resources resources = ArtWatchFace.this.getResources();
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(ContextCompat.getColor(getApplicationContext(), R.color.black));
-            mHourPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
-            mMinutePaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
-            mColonPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
             mCalendar = Calendar.getInstance();
             mDate = new Date();
-            mHourPaint.setTextSize(resources.getDimension(R.dimen.font_size_time));
-            mMinutePaint.setTextSize(resources.getDimension(R.dimen.font_size_time));
-            mColonPaint.setTextSize(resources.getDimension(R.dimen.font_size_time));
-            mTimeX = resources.getDimension(R.dimen.time_x);
-            mTimeY = resources.getDimension(R.dimen.time_y);
         }
 
         /**

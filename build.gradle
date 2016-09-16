@@ -64,7 +64,7 @@ def getVersion() {
  */
 def getVersionName() {
     def tag = System.getenv("TAG_NAME")
-    if (tag == null) {
+    if (tag == null || tag == "" || tag == " ") {
         return "1.0.0"
     }
     return tag.minus("v")
