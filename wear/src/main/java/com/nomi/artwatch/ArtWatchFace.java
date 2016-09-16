@@ -216,29 +216,33 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             Log.v(this.getClass().getCanonicalName(), "onDraw");
 
-            // Draw the background.
-            canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
-
             int widthSpec = View.MeasureSpec.makeMeasureSpec(bounds.width(), View.MeasureSpec.EXACTLY);
             int heightSpec = View.MeasureSpec.makeMeasureSpec(bounds.height(), View.MeasureSpec.EXACTLY);
             mRootView.measure(widthSpec, heightSpec);
+            mRootView.layout(0, 0, bounds.width(), bounds.height());
 
             if (mGifResource != null) {
-                // TODO：Centering
-                mRootView.layout(
-                        0,
-                        0,
-                        bounds.width(),
-                        bounds.width() * mGifResource.getIntrinsicHeight() / mGifResource.getIntrinsicWidth()
+                // Adjust GifImageView size
+                int width = bounds.width();
+                int height = bounds.width() * mGifResource.getIntrinsicHeight() / mGifResource.getIntrinsicWidth();
+
+                mGifImageView.measure(
+                        View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                        View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
+                );
+                mGifImageView.layout(
+                        (bounds.width() - width) / 2,
+                        (bounds.height() - height) / 2,
+                        (bounds.width() + width) / 2,
+                        (bounds.height() + height) / 2
                 );
             } else {
-                mRootView.layout(0, 0, bounds.width(), bounds.height());
+                mGifImageView.layout(0, 0, bounds.width(), bounds.height());
             }
 
-            setMarginToTimeView();
-
             mGifImageView.setVisibility(mIsSleeping ? View.GONE : View.VISIBLE);
-            mRootView.draw(canvas);
+
+            setMarginToTimeView();
 
             if (isInAmbientMode()) {
                 boolean is24Hour = DateFormat.is24HourFormat(ArtWatchFace.this);
@@ -269,6 +273,8 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             } else {
                 mTimeView.setVisibility(View.GONE);
             }
+
+            mRootView.draw(canvas);
         }
 
         @Override
