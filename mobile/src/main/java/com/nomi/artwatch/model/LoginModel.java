@@ -3,7 +3,6 @@ package com.nomi.artwatch.model;
 import android.content.Context;
 import android.net.Uri;
 
-import com.nomi.artwatch.Application;
 import com.nomi.artwatch.Config;
 import com.nomi.artwatch.R;
 import com.nomi.artwatch.ui.util.DeepLinkRouter;
@@ -107,9 +106,7 @@ public class LoginModel {
     private String getCallbackUrl() {
         String url = mContext.getString(R.string.scheme)
                 + "://"
-                + DeepLinkRouter.Companion.getLOGIN()
-                + "/"
-                + Application.sPeerId;
+                + DeepLinkRouter.Companion.getLOGIN();
 
         Timber.d("getCallbackUrl : %s", url);
 

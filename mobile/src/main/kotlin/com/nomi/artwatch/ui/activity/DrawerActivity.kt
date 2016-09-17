@@ -3,7 +3,6 @@ package com.nomi.artwatch.ui.activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.database.sqlite.SQLiteDatabase
-import android.net.Uri
 import android.os.Bundle
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -24,9 +23,7 @@ import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.SimpleTarget
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.wearable.*
-import com.nomi.artwatch.Application
 import com.nomi.artwatch.GifUrlProvider
 import com.nomi.artwatch.GifUrlProvider.Type
 import com.nomi.artwatch.R
@@ -48,7 +45,6 @@ import javax.inject.Inject
 abstract class DrawerActivity : InjectActivity() {
 
     companion object {
-        val SCHEME = "wear"
         private val PATH_OF_GIF = "/gif"
         private val KEY_GIF = "gif"
         private val PATH_WITH_FEATURE_LATEST_GIF = "/gif/latest"
@@ -59,33 +55,17 @@ abstract class DrawerActivity : InjectActivity() {
 
     private val mGoogleConnectionCallback = object : GoogleApiClient.ConnectionCallbacks {
         override fun onConnected(connectionHint: Bundle?) {
-            if (Application.sPeerId != null) {
-                Timber.d("Connected to wear.")
-                val builder = Uri.Builder()
-                val featureGifUri = builder.scheme(SCHEME).path(PATH_WITH_FEATURE_LATEST_GIF).authority(Application.sPeerId).build()
-                Wearable.DataApi.getDataItem(mGoogleApiClient, featureGifUri).setResultCallback(mResultCallback)
-            }
+            this@DrawerActivity.onConnected(connectionHint)
         }
 
         override fun onConnectionSuspended(cause: Int) {
-            // TODO：Handling
+            this@DrawerActivity.onConnectionSuspended(cause)
         }
     }
 
-    /**
-     * Callback from wear.
-     */
-    private val mResultCallback = object : ResultCallback<DataApi.DataItemResult> {
-        override fun onResult(dataItemResult: DataApi.DataItemResult) {
-            if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
-                val configDataItem = dataItemResult.getDataItem()
-                val dataMapItem = DataMapItem.fromDataItem(configDataItem)
-                val config = dataMapItem.dataMap
-                Timber.d("ResultCallback : success")
-
-            } else {
-                Timber.d("ResultCallback : error")
-            }
+    private val mDataListener = object : DataApi.DataListener {
+        override fun onDataChanged(dataEvents: DataEventBuffer) {
+            this@DrawerActivity.onDataChanged(dataEvents)
         }
     }
 
@@ -113,13 +93,17 @@ abstract class DrawerActivity : InjectActivity() {
     protected abstract val layout: Int
     protected abstract val toolbarName: Int
     protected abstract val shouldShowSpinner: Boolean
-    
-    open fun getGoogleConnectionCallback() : GoogleApiClient.ConnectionCallbacks {
-        return mGoogleConnectionCallback
+
+    open fun onConnected(connectionHint: Bundle?) {
+        Wearable.DataApi.addListener(mGoogleApiClient, mDataListener)
     }
 
-    open fun getGoogleConnectionFailedListener() : GoogleApiClient.OnConnectionFailedListener {
-        return mGoogleConnectionFailedListener
+    open fun onConnectionSuspended(cause: Int) {
+        // TODO：Handling
+    }
+
+    open fun onDataChanged(dataEvents: DataEventBuffer) {
+        // no-op
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,8 +118,8 @@ abstract class DrawerActivity : InjectActivity() {
 
         mGoogleApiClient = GoogleApiClient
                 .Builder(this)
-                .addConnectionCallbacks(getGoogleConnectionCallback())
-                .addOnConnectionFailedListener(getGoogleConnectionFailedListener())
+                .addConnectionCallbacks(mGoogleConnectionCallback)
+                .addOnConnectionFailedListener(mGoogleConnectionFailedListener)
                 .addApi(Wearable.API)
                 .build()
 
@@ -149,6 +133,7 @@ abstract class DrawerActivity : InjectActivity() {
 
     override fun onStop() {
         if (mGoogleApiClient != null && mGoogleApiClient!!.isConnected) {
+            Wearable.DataApi.removeListener(mGoogleApiClient, mDataListener)
             mGoogleApiClient!!.disconnect()
         }
         super.onStop()
@@ -183,25 +168,27 @@ abstract class DrawerActivity : InjectActivity() {
      */
     @DebugLog
     fun onGifSelected(gif: Gif) {
-        if (Application.sPeerId != null) {
-            updateGifCache(gif)
-
-            Glide.with(this).load(GifUrlProvider.getUrl(gif.photoSizes, Type.WEAR)).asGif().into(object : SimpleTarget<GifDrawable>() {
-                override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
-                    // Convert GifDrawable to Asset.
-                    val asset = createAssetFromDrawable(resource)
-
-                    val dataMap = PutDataMapRequest.create(PATH_OF_GIF)
-                    dataMap.dataMap.putAsset(KEY_GIF, asset)
-                    val request = dataMap.asPutDataRequest()
-
-                    // Send the request.
-                    Wearable.DataApi.putDataItem(mGoogleApiClient, request)
-
-                    Toast.makeText(this@DrawerActivity, "changed", Toast.LENGTH_SHORT).show()
-                }
-            })
+        if (!mGoogleApiClient!!.isConnected) {
+            Toast.makeText(this@DrawerActivity, "Please connect to Android Wear", Toast.LENGTH_SHORT).show()
+            return
         }
+        updateGifCache(gif)
+
+        Glide.with(this).load(GifUrlProvider.getUrl(gif.photoSizes, Type.WEAR)).asGif().into(object : SimpleTarget<GifDrawable>() {
+            override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
+                // Convert GifDrawable to Asset.
+                val asset = createAssetFromDrawable(resource)
+
+                val dataMap = PutDataMapRequest.create(PATH_OF_GIF)
+                dataMap.dataMap.putAsset(KEY_GIF, asset)
+                val request = dataMap.asPutDataRequest()
+
+                // Send the request.
+                Wearable.DataApi.putDataItem(mGoogleApiClient, request)
+
+                Toast.makeText(this@DrawerActivity, "changed", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     /**
