@@ -45,9 +45,9 @@ import javax.inject.Inject
 abstract class DrawerActivity : InjectActivity() {
 
     companion object {
+        val SCHEME = "wear"
         private val PATH_OF_GIF = "/gif"
         private val KEY_GIF = "gif"
-        private val PATH_WITH_FEATURE_LATEST_GIF = "/gif/latest"
     }
 
     protected var mGoogleApiClient: GoogleApiClient? = null
