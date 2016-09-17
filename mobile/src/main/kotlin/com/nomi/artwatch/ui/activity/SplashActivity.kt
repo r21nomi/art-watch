@@ -3,8 +3,6 @@ package com.nomi.artwatch.ui.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.wearable.companion.WatchFaceCompanion
-import com.nomi.artwatch.Application
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.LoginModel
@@ -36,12 +34,6 @@ class SplashActivity : InjectActivity() {
         // FIXME：DeepLinkRouter内でIntentを作成すると、たまにNoClassDefFoundErrorが発生するので
         // MainActivityの起動Intentはここで作成する。
         mMainIntent = MainActivity.createIntent(this)
-
-        if (intent.hasExtra(WatchFaceCompanion.EXTRA_PEER_ID)) {
-            Application.setPeerId(intent.getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID))
-        }
-
-        Timber.d("Application.sPeerId : " + Application.sPeerId)
 
         val subscription = setToken()
                 .observeOn(AndroidSchedulers.mainThread())

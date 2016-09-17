@@ -2,7 +2,6 @@ package com.nomi.artwatch.ui.util
 
 import android.content.Intent
 import android.net.Uri
-import com.nomi.artwatch.Application
 import com.nomi.artwatch.util.StringUtil
 import rx.Observable
 
@@ -22,18 +21,21 @@ class DeepLinkRouter {
             }
             val pathParams = StringUtil.split(path, '/')
 
-            if (LOGIN.equals(host) && pathParams.size == 1) {
-                // ex. artwatch://login/xxxx
+            if (fromTumblrOAuth(host, pathParams)) {
+                // ex. artwatch://login
                 // FIXME：ここでIntentをつくるとたまにjava.lang.NoClassDefFoundError: com.nomi.artwatch.ui.activity.MainActivity
                 // が発生することがある。
                 // これを避けるために呼び出し側で作成したIntentを渡すようにした
 //                val intent = MainActivity.createIntent(context)
-                Application.setPeerId(pathParams[0])
                 return Observable.just(intent)
 
             } else {
                 return Observable.just(null)
             }
+        }
+
+        private fun fromTumblrOAuth(host: String, pathParams: List<String>) : Boolean {
+            return LOGIN.equals(host) && pathParams.size == 0
         }
     }
 }
