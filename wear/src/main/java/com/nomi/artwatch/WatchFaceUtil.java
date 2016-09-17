@@ -21,24 +21,26 @@ import rx.functions.Action1;
  */
 public class WatchFaceUtil {
 
-    private static final String SCHEME = "wear";
-    private static final String PATH_WITH_FEATURE_LATEST_GIF = "/gif/latest";
-    private static final String PATH_WITH_FEATURE_GIF_TIMEOUT = "/gif/timeout";
+    public static final String SCHEME = "wear";
+    public static final String PATH_OF_GIF = "/gif";
+    public static final String PATH_OF_TIMEOUT = "/timeout";
+    public static final String KEY_GIF = "gif";
+    public static final String KEY_TIMEOUT = "timeout";
 
     public static void fetchGifDataMap(GoogleApiClient client, Action1<DataMap> callback) {
-        fetchConfigDataMap(client, PATH_WITH_FEATURE_LATEST_GIF, callback);
+        fetchConfigDataMap(client, PATH_OF_GIF, callback);
     }
 
     public static void fetchTimeoutDataMap(GoogleApiClient client, Action1<DataMap> callback) {
-        fetchConfigDataMap(client, PATH_WITH_FEATURE_GIF_TIMEOUT, callback);
+        fetchConfigDataMap(client, PATH_OF_TIMEOUT, callback);
     }
 
     public static void putGifData(GoogleApiClient googleApiClient, DataMap newConfig, Action1<DataMap> callback) {
-        putConfigDataItem(googleApiClient, newConfig, PATH_WITH_FEATURE_LATEST_GIF, callback);
+        putConfigDataItem(googleApiClient, newConfig, PATH_OF_GIF, callback);
     }
 
     public static void putTimeoutData(GoogleApiClient googleApiClient, DataMap newConfig, Action1<DataMap> callback) {
-        putConfigDataItem(googleApiClient, newConfig, PATH_WITH_FEATURE_GIF_TIMEOUT, callback);
+        putConfigDataItem(googleApiClient, newConfig, PATH_OF_TIMEOUT, callback);
     }
 
     /**

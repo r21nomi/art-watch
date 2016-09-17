@@ -2,16 +2,19 @@ package com.nomi.artwatch.ui.activity
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import butterknife.bindView
-import com.google.android.gms.wearable.*
+import com.google.android.gms.common.api.ResultCallback
+import com.google.android.gms.wearable.DataApi
+import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
-import rx.Observable
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -23,7 +26,6 @@ class SettingActivity : DrawerActivity() {
     companion object {
         private val PATH_OF_TIMEOUT = "/timeout"
         private val KEY_TIMEOUT = "timeout"
-        private val PATH_WITH_FEATURE_GIF_TIMEOUT = "/gif/timeout"
 
         fun createIntent(context: Context): Intent {
             val intent = Intent(context, SettingActivity::class.java)
@@ -47,39 +49,30 @@ class SettingActivity : DrawerActivity() {
     override fun onConnected(connectionHint: Bundle?) {
         super.onConnected(connectionHint)
 
-        // Get data from wear.
-        Observable
-                .fromCallable { Wearable.DataApi.getDataItems(mGoogleApiClient).await() }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ itemBuffer ->
-                    for (item in itemBuffer) {
-                        if (PATH_WITH_FEATURE_GIF_TIMEOUT.equals(item.uri.path)) {
-                            val map = DataMap.fromByteArray(item.data)
+        // Get Node Id first.
+        Wearable.NodeApi.getLocalNode(mGoogleApiClient).setResultCallback { getLocalNodeResult ->
+            val localNode = getLocalNodeResult.node.id
+            val uri = Uri.Builder().scheme(SCHEME).path(PATH_OF_TIMEOUT).authority(localNode).build()
+
+            // Get data from wear.
+            Wearable.DataApi.getDataItem(mGoogleApiClient, uri).setResultCallback(object : ResultCallback<DataApi.DataItemResult> {
+                override fun onResult(dataItemResult: DataApi.DataItemResult) {
+                    Log.d(this.javaClass.canonicalName, "fetchConfigDataMap onResult.")
+
+                    if (dataItemResult.status.isSuccess) {
+                        if (dataItemResult.dataItem != null) {
+                            val configDataItem = dataItemResult.dataItem
+                            val dataMapItem = DataMapItem.fromDataItem(configDataItem)
+                            val dataMap = dataMapItem.dataMap
                             // Set initial time.
-                            setTime(map.getLong(KEY_TIMEOUT))
+                            setTime(dataMap.getLong(KEY_TIMEOUT))
+                        } else {
+                            Log.d(this.javaClass.canonicalName, "No data was found. Set default time.")
+                            setTime(0)
                         }
                     }
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
-                })
-    }
-
-    override fun onDataChanged(dataEvents: DataEventBuffer) {
-        super.onDataChanged(dataEvents)
-
-        for (event in dataEvents) {
-            when (event.type) {
-                DataEvent.TYPE_CHANGED -> {
-                    val item = event.dataItem
-                    val dataMap = DataMapItem.fromDataItem(item).dataMap
-                    // Update time.
-                    setTime(dataMap.getLong(KEY_TIMEOUT))
                 }
-                DataEvent.TYPE_DELETED -> {
-
-                }
-            }
+            })
         }
     }
 

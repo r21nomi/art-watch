@@ -53,10 +53,6 @@ public class ArtWatchFace extends CanvasWatchFaceService {
 
     private static final long GIF_ANIMATE_DURATION = 100;
     private static final int HIDE_GIF_IMAGE_TIMER_MS = (int) TimeUnit.SECONDS.toMillis(30);
-    private static final String PATH_OF_GIF = "/gif";
-    private static final String PATH_OF_TIMEOUT = "/timeout";
-    private static final String KEY_GIF = "gif";
-    private static final String KEY_TIMEOUT = "timeout";
     private static final String COLON_STRING = " : ";
 
     @Override
@@ -104,12 +100,12 @@ public class ArtWatchFace extends CanvasWatchFaceService {
             public void onDataChanged(DataEventBuffer dataEvents) {
                 for (DataEvent event : dataEvents) {
                     if (event.getType() == DataEvent.TYPE_CHANGED) {
-                        if (event.getDataItem().getUri().getPath().equals(PATH_OF_GIF)) {
+                        if (event.getDataItem().getUri().getPath().equals(WatchFaceUtil.PATH_OF_GIF)) {
                             DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
                             DataMap dataMap = dataMapItem.getDataMap();
                             applyGifDataMap(dataMap);
 
-                        } else if (event.getDataItem().getUri().getPath().equals(PATH_OF_TIMEOUT)) {
+                        } else if (event.getDataItem().getUri().getPath().equals(WatchFaceUtil.PATH_OF_TIMEOUT)) {
                             DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
                             DataMap dataMap = dataMapItem.getDataMap();
                             applyTimeoutDataMap(dataMap);
@@ -148,7 +144,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 // Fetch timeout count from storage.
                 WatchFaceUtil.fetchTimeoutDataMap(mGoogleApiClient, resultDataMap -> {
                     if (resultDataMap != null) {
-                        mTimeout = resultDataMap.getLong(KEY_TIMEOUT);
+                        mTimeout = resultDataMap.getLong(WatchFaceUtil.KEY_TIMEOUT);
                     }
                 });
             }
@@ -326,7 +322,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
          * @param dataMap
          */
         private void applyGifDataMap(DataMap dataMap) {
-            Asset asset = dataMap.getAsset(KEY_GIF);
+            Asset asset = dataMap.getAsset(WatchFaceUtil.KEY_GIF);
             // Change Gif image.
             changeGifWithAsset(asset);
             // Save data onto storage.
@@ -334,7 +330,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
         }
 
         private void applyTimeoutDataMap(DataMap dataMap) {
-            mTimeout = dataMap.getLong(KEY_TIMEOUT);
+            mTimeout = dataMap.getLong(WatchFaceUtil.KEY_TIMEOUT);
 
             showGifImage();
             startGifAnimate();
