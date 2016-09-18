@@ -201,6 +201,7 @@ abstract class DrawerActivity : InjectActivity() {
                     Glide.with(this)
                             .load(url)
                             .bitmapTransform(CropCircleTransformation(this))
+                            .placeholder(R.drawable.placeholder_user)
                             .into(mUserThumb)
                 }, { throwable ->
                     Timber.e(throwable, throwable.message)
