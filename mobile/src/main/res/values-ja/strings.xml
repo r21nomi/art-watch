@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="no_gifs">表示できるGifがありません</string>
+    <string name="gif_changed">変更しました</string>
+
+    <!-- Error -->
+    <string name="error_no_connection_to_wear">Android Wearに接続してください</string>
+
+    <!-- Dialog -->
+    <string name="dialog_logout_title">Logout</string>
+    <string name="dialog_logout_message">ログアウトします。よろしいですか?</string>
+    <string name="dialog_logout_btn_positive">OK</string>
+    <string name="dialog_logout_btn_negative">キャンセル</string>
 </resources>

@@ -170,7 +170,7 @@ abstract class DrawerActivity : InjectActivity() {
     @DebugLog
     fun onGifSelected(gif: Gif) {
         if (!mGoogleApiClient!!.isConnected) {
-            Toast.makeText(this@DrawerActivity, "Please connect to Android Wear", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@DrawerActivity, getString(R.string.error_no_connection_to_wear), Toast.LENGTH_SHORT).show()
             return
         }
         updateGifCache(gif)
@@ -187,7 +187,7 @@ abstract class DrawerActivity : InjectActivity() {
                 // Send the request.
                 Wearable.DataApi.putDataItem(mGoogleApiClient, request)
 
-                Toast.makeText(this@DrawerActivity, "changed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@DrawerActivity, getString(R.string.gif_changed), Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -287,12 +287,12 @@ abstract class DrawerActivity : InjectActivity() {
 
     private fun logout() {
         AlertDialog.Builder(this, R.style.DefaultDialog)
-                .setTitle("Logout")
-                .setMessage("Are you sure?")
-                .setPositiveButton("Yes", {dialogInterface, i ->
+                .setTitle(R.string.dialog_logout_title)
+                .setMessage(R.string.dialog_logout_message)
+                .setPositiveButton(R.string.dialog_logout_btn_positive, {dialogInterface, i ->
                     mLoginModel.logout().subscribe({aVoid -> startActivity()})
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.dialog_logout_btn_negative, null)
                 .create()
                 .show()
     }

@@ -58,14 +58,14 @@ class HistoryActivity : DrawerActivity() {
                     return@mapToList GifCache.toGif(cursor)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({gifs ->
+                .subscribe({ gifs ->
                     if (gifs.isNotEmpty()) {
                         mArtView.setDataSet(gifs)
 
                     } else {
                         toggleEmptyView(true)
                     }
-                }, {throwable ->
+                }, { throwable ->
                     Timber.e(throwable, throwable.message)
                     toggleEmptyView(true)
                 })
