@@ -29,7 +29,6 @@ import javax.inject.Inject
 class MainActivity : DrawerActivity() {
 
     private var mBlogAdapter: BlogAdapter? = null
-    private var mCurrentBlogName: String? = null
 
     @Inject
     lateinit var mPostModel: PostModel
@@ -42,11 +41,12 @@ class MainActivity : DrawerActivity() {
          * Change blog.
          */
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            val blogName: String? = mBlogAdapter?.getItem(position)?.name
-            mCurrentBlogName = blogName
+            val blog = mBlogAdapter?.getItem(position)
+            mBlogModel.currentBlog = blog
             showGifs()
+            setUserThumb(blog?.name)
 
-            Timber.d("onItemSelected : " + blogName)
+            Timber.d("onItemSelected : " + blog?.name)
         }
 
         override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -96,7 +96,7 @@ class MainActivity : DrawerActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ user ->
                     if (!user.blogs.isEmpty()) {
-                        mCurrentBlogName = user.blogs[0].name
+                        mBlogModel.setCurrentBlog(user.blogs[0])
                     }
                     // AdapterView.OnItemSelectedListener#onItemSelected will be called and then,
                     // showGifs will be executed.
@@ -138,7 +138,7 @@ class MainActivity : DrawerActivity() {
      */
     private fun fetchGifPosts() {
         val subscription = mPostModel
-                .getPhotoPost(mCurrentBlogName)
+                .getPhotoPost(mBlogModel.currentBlog.name)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ items ->
                     mArtView.setDataSet(toGif(items))

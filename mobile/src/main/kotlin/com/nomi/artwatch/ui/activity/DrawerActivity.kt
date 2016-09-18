@@ -33,6 +33,7 @@ import com.nomi.artwatch.model.BlogModel
 import com.nomi.artwatch.model.LoginModel
 import com.nomi.artwatch.model.UserModel
 import com.squareup.sqlbrite.BriteDatabase
+import com.tumblr.jumblr.types.User
 import hugo.weaving.DebugLog
 import jp.wasabeef.glide.transformations.CropCircleTransformation
 import rx.android.schedulers.AndroidSchedulers
@@ -191,6 +192,22 @@ abstract class DrawerActivity : InjectActivity() {
         })
     }
 
+    fun setUserThumb(blogName: String?) {
+        val subscription = mBlogModel
+                .getAvatar(blogName)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ url ->
+                    Timber.d("URL : " + url)
+                    Glide.with(this)
+                            .load(url)
+                            .bitmapTransform(CropCircleTransformation(this))
+                            .into(mUserThumb)
+                }, { throwable ->
+                    Timber.e(throwable, throwable.message)
+                })
+        mSubscriptionsOnDestroy.add(subscription)
+    }
+
     /**
      * Update GifCache table.
      */
@@ -259,7 +276,7 @@ abstract class DrawerActivity : InjectActivity() {
                 .user
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ user ->
-                    setUserThumb()
+                    setUserThumb(user)
                     mUserName.text = user.name
                 }, { throwable ->
                     Timber.e(throwable, throwable.message)
@@ -298,19 +315,9 @@ abstract class DrawerActivity : InjectActivity() {
         startActivity(intent)
     }
 
-    private fun setUserThumb() {
-        val subscription = mBlogModel
-                .getAvatar("ryotaniinomi")
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ url ->
-                    Glide.with(this)
-                            .load(url)
-                            .bitmapTransform(CropCircleTransformation(this))
-                            .into(mUserThumb)
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
-                })
-        mSubscriptionsOnDestroy.add(subscription)
+    private fun setUserThumb(user: User) {
+        val blogName = mBlogModel.getBlogByUserOrCurrent(user)?.name
+        setUserThumb(blogName)
     }
 
     private fun startActivity() {
