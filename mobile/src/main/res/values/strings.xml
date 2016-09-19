@@ -14,6 +14,16 @@
     <string name="settings_button_label" translatable="false">Settings</string>
     <string name="logout_button_label" translatable="false">Logout</string>
     <string name="no_gifs">No Gifs</string>
+    <string name="gif_changed">Changed</string>
+
+    <!-- Error -->
+    <string name="error_no_connection_to_wear">Please connect to Android Wear</string>
+
+    <!-- Dialog -->
+    <string name="dialog_logout_title">Logout</string>
+    <string name="dialog_logout_message">Are you sure?</string>
+    <string name="dialog_logout_btn_positive">OK</string>
+    <string name="dialog_logout_btn_negative">Cancel</string>
 
     <string name="settings_timeout_title" translatable="false">Timeout</string>
     <string name="settings_timeout_30_sec" translatable="false">30 Sec</string>

@@ -3,7 +3,6 @@ package com.nomi.artwatch.ui.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.TextView
 import butterknife.bindView
 import com.bumptech.glide.Glide
@@ -26,7 +25,6 @@ class LoginActivity : InjectActivity() {
     @Inject
     lateinit var mLoginModel: LoginModel
 
-    val mRootView : View by bindView(R.id.root)
     val mGifView : GifImageView by bindView(R.id.gifView)
     val mLoginText : TextView by bindView(R.id.loginText)
 
