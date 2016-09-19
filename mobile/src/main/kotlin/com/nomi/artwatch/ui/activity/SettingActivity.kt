@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.TextView
 import butterknife.bindView
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.wearable.DataApi
@@ -34,6 +35,7 @@ class SettingActivity : DrawerActivity() {
     }
 
     val mRadioGroup: RadioGroup by bindView(R.id.radioGroup)
+    val mOssLicenseBtn: TextView by bindView(R.id.ossLicenseBtn)
 
     private var mCurrentItem: Item = Item.ITEM_1
     private var mTime: Long = 0
@@ -100,6 +102,10 @@ class SettingActivity : DrawerActivity() {
             } else {
                 Timber.d("not found")
             }
+        }
+
+        mOssLicenseBtn.setOnClickListener {
+            startActivity(OssActivity.createIntent(this))
         }
     }
 
