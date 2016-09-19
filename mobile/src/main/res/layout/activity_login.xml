@@ -8,36 +8,30 @@
         android:id="@+id/gifView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        />
+        android:scaleType="centerCrop" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/translucent_black"
-        />
+        android:background="@color/translucent_black" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_logo_white"
         android:layout_gravity="center"
-        />
+        android:src="@drawable/ic_logo_white" />
 
     <com.nomi.artwatch.ui.view.CustomFontTextView
         android:id="@+id/loginText"
-        android:text="@string/login_tumblr"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/font_size_16sp"
-        android:textColor="@color/white"
-        android:background="@color/translucent_black"
-        android:gravity="center"
+        android:layout_height="@dimen/login_btn_height"
         android:layout_gravity="bottom"
-        android:paddingTop="@dimen/margin_8dp"
-        android:paddingBottom="@dimen/margin_8dp"
-        android:layout_marginRight="@dimen/margin_16dp"
-        android:layout_marginLeft="@dimen/margin_16dp"
         android:layout_marginBottom="@dimen/margin_112dp"
-        />
+        android:layout_marginLeft="@dimen/margin_32dp"
+        android:layout_marginRight="@dimen/margin_32dp"
+        android:background="@drawable/login_btn"
+        android:gravity="center"
+        android:text="@string/login_tumblr"
+        android:textColor="@color/white"
+        android:textSize="@dimen/font_size_16sp" />
 </FrameLayout>
