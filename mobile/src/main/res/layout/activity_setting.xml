@@ -48,4 +48,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </RadioGroup>
+
+    <TextView
+        android:id="@+id/ossLicenseBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_64dp"
+        android:paddingBottom="@dimen/margin_16dp"
+        android:text="@string/oss_license"
+        android:textColor="@color/black"
+        android:textSize="@dimen/font_size_14sp" />
 </LinearLayout>

@@ -8,6 +8,7 @@
     <string name="home" translatable="false">Home</string>
     <string name="history" translatable="false">History</string>
     <string name="settings" translatable="false">Settings</string>
+    <string name="oss_license" translatable="false">OSS License</string>
     <string name="login_tumblr" translatable="false">Login to Tumblr</string>
     <string name="home_button_label" translatable="false">Home</string>
     <string name="history_button_label" translatable="false">History</string>
