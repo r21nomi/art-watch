@@ -25,11 +25,11 @@ ext {
     TARGET_SDK_VERSION = 23
     VERSION_CODE = getVersion()
     VERSION_NAME = getVersionName()
-    SUPPORT_LIBRARY_VERSION = "23.1.1"
-    SUPPORT_WEARABLE_VERSION = "1.3.0"
-    PLAY_SERVICES_VERSION = "9.2.1"
-    FIREBASE_VERSION = "9.2.1"
-    KOTLIN_VERSION = '1.0.1'
+    SUPPORT_LIBRARY_VERSION = "24.2.1"
+    SUPPORT_WEARABLE_VERSION = "1.4.0"
+    PLAY_SERVICES_VERSION = "9.4.0"
+    FIREBASE_VERSION = "9.4.0"
+    KOTLIN_VERSION = '1.0.3'
 
     signingConfigs = {
         release {
