@@ -53,8 +53,14 @@ class SplashActivity : InjectActivity() {
                     }
                 }, { throwable ->
                     Timber.e(throwable, throwable.message)
+                    moveToLoginWithMessage(getString(R.string.error_failed_to_login))
                 })
         mSubscriptionsOnDestroy.add(subscription)
+    }
+
+    override fun startActivity(intent: Intent?) {
+        super.startActivity(intent)
+        finish()
     }
 
     /**
@@ -71,22 +77,26 @@ class SplashActivity : InjectActivity() {
     }
 
     private fun moveToLogin() {
-        val intent = Intent(this, LoginActivity::class.java)
+        val intent = LoginActivity.createIntent(this)
         startActivity(intent)
-        finish()
+    }
+
+    private fun moveToLoginWithMessage(message: String) {
+        val intent = LoginActivity.createIntentWithMessage(this, message)
+        startActivity(intent)
     }
 
     private fun moveToMain() {
         val intent = MainActivity.createIntent(this)
         startActivity(intent)
-        finish()
     }
 
     private fun startDeepLink(uri: Uri) {
         val subscription = DeepLinkRouter
                 .createIntent(mMainIntent!!, uri)
                 .subscribe({
-                    intent -> startActivity(intent)
+                    intent ->
+                    startActivity(intent)
                 }, {
                     throwable -> Timber.e(throwable, throwable.message)
                 })

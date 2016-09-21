@@ -19,6 +19,7 @@
 
     <!-- Error -->
     <string name="error_no_connection_to_wear">Please connect to Android Wear</string>
+    <string name="error_failed_to_login">Failed to login. Please try again.</string>
 
     <!-- Dialog -->
     <string name="dialog_logout_title">Logout</string>

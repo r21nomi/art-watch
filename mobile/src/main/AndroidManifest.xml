@@ -13,7 +13,8 @@
         <activity
             android:name=".ui.activity.SplashActivity"
             android:label="@string/app_name"
-            android:theme="@style/ActivitySplash">
+            android:theme="@style/ActivitySplash"
+            android:launchMode="singleTop">
 
             <intent-filter>
                 <action android:name="com.nomi.artwatch.CONFIG_WATCH" />

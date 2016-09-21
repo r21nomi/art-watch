@@ -1,9 +1,11 @@
 package com.nomi.artwatch.ui.activity
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.TextView
+import android.widget.Toast
 import butterknife.bindView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
@@ -21,6 +23,19 @@ import javax.inject.Inject
  * Created by Ryota Niinomi on 16/03/15.
  */
 class LoginActivity : InjectActivity() {
+
+    companion object {
+        val MESSAGE: String = "message"
+        fun createIntentWithMessage(context: Context, message: String): Intent {
+            val intent = Intent(context, LoginActivity::class.java)
+            intent.putExtra(MESSAGE, message)
+            return intent
+        }
+        fun createIntent(context: Context): Intent {
+            val intent = Intent(context, LoginActivity::class.java)
+            return intent
+        }
+    }
 
     @Inject
     lateinit var mLoginModel: LoginModel
@@ -47,6 +62,10 @@ class LoginActivity : InjectActivity() {
         mLoginText.setOnClickListener({
             authorize()
         })
+
+        if (intent.hasExtra(MESSAGE)) {
+            Toast.makeText(this, intent.getStringExtra(MESSAGE), Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun authorize() {

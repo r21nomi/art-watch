@@ -5,6 +5,7 @@
 
     <!-- Error -->
     <string name="error_no_connection_to_wear">Android Wearに接続してください</string>
+    <string name="error_failed_to_login">ログインに失敗しました。再度お試しください</string>
 
     <!-- Dialog -->
     <string name="dialog_logout_title">Logout</string>
