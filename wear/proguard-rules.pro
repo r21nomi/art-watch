@@ -32,3 +32,9 @@
 -keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
     rx.internal.util.atomic.LinkedQueueNode consumerNode;
 }
+
+# For crash repoting
+-keepattributes *Annotation*
+-keepattributes SourceFile, LineNumberTable
+-keep public class * extends java.lang.Exception
+-printmapping mapping.txt
