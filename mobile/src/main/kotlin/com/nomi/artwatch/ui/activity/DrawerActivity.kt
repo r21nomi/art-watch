@@ -31,6 +31,7 @@ import com.nomi.artwatch.data.entity.Gif
 import com.nomi.artwatch.model.BlogModel
 import com.nomi.artwatch.model.LoginModel
 import com.nomi.artwatch.model.UserModel
+import com.nomi.artwatch.ui.util.BluetoothUtil
 import com.nomi.artwatch.ui.util.SnackbarUtil
 import com.squareup.sqlbrite.BriteDatabase
 import com.tumblr.jumblr.types.User
@@ -170,9 +171,14 @@ abstract class DrawerActivity : InjectActivity() {
     @DebugLog
     fun onGifSelected(gif: Gif) {
         if (!mGoogleApiClient!!.isConnected) {
-            SnackbarUtil.showAlert(this@DrawerActivity, getString(R.string.error_no_connection_to_wear))
+            SnackbarUtil.showAlert(this, getString(R.string.error_no_connection_to_wear))
             return
         }
+        if (!BluetoothUtil.isEnabled()) {
+            SnackbarUtil.showAlert(this, getString(R.string.error_no_connection_to_bluetooth))
+            return
+        }
+
         updateGifCache(gif)
 
         Glide.with(this).load(GifUrlProvider.getUrl(gif.photoSizes, Type.WEAR)).asGif().into(object : SimpleTarget<GifDrawable>() {
