@@ -27,6 +27,7 @@ class SettingActivity : DrawerActivity() {
     companion object {
         private val PATH_OF_TIMEOUT = "/timeout"
         private val KEY_TIMEOUT = "timeout"
+        private val DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(30)
 
         fun createIntent(context: Context): Intent {
             val intent = Intent(context, SettingActivity::class.java)
@@ -70,7 +71,7 @@ class SettingActivity : DrawerActivity() {
                             setTime(dataMap.getLong(KEY_TIMEOUT))
                         } else {
                             Log.d(this.javaClass.canonicalName, "No data was found. Set default time.")
-                            setTime(0)
+                            setTime(DEFAULT_TIMEOUT)
                         }
                     }
                 }

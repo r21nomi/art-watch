@@ -144,7 +144,7 @@ public class ArtWatchFace extends CanvasWatchFaceService {
                 // Fetch timeout count from storage.
                 WatchFaceUtil.fetchTimeoutDataMap(mGoogleApiClient, resultDataMap -> {
                     if (resultDataMap != null) {
-                        mTimeout = resultDataMap.getLong(WatchFaceUtil.KEY_TIMEOUT);
+                        mTimeout = resultDataMap.getLong(WatchFaceUtil.KEY_TIMEOUT, HIDE_GIF_IMAGE_TIMER_MS);
                     }
                 });
             }
