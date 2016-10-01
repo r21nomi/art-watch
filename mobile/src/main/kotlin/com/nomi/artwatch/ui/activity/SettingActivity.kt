@@ -16,6 +16,8 @@ import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
+import com.nomi.artwatch.ui.util.BluetoothUtil
+import com.nomi.artwatch.ui.util.SnackbarUtil
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -118,6 +120,15 @@ class SettingActivity : DrawerActivity() {
     }
 
     private fun selectRadioItem(item: Item) {
+        if (!mGoogleApiClient!!.isConnected) {
+            SnackbarUtil.showAlert(this, getString(R.string.error_no_connection_to_wear))
+            return
+        }
+        if (!BluetoothUtil.isEnabled()) {
+            SnackbarUtil.showAlert(this, getString(R.string.error_no_connection_to_bluetooth))
+            return
+        }
+
         val dataMap = PutDataMapRequest.create(PATH_OF_TIMEOUT)
         dataMap.dataMap.putLong(KEY_TIMEOUT, item.time)
         Wearable.DataApi.putDataItem(mGoogleApiClient, dataMap.asPutDataRequest())
