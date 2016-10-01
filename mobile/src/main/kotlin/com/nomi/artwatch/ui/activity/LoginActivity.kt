@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.TextView
-import android.widget.Toast
 import butterknife.bindView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
@@ -14,6 +13,7 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.LoginModel
+import com.nomi.artwatch.ui.util.SnackbarUtil
 import pl.droidsonroids.gif.GifImageView
 import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
@@ -64,7 +64,7 @@ class LoginActivity : InjectActivity() {
         })
 
         if (intent.hasExtra(MESSAGE)) {
-            Toast.makeText(this, intent.getStringExtra(MESSAGE), Toast.LENGTH_SHORT).show()
+            SnackbarUtil.showAlert(this, intent.getStringExtra(MESSAGE))
         }
     }
 

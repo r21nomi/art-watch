@@ -16,7 +16,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import butterknife.bindView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
@@ -32,6 +31,7 @@ import com.nomi.artwatch.data.entity.Gif
 import com.nomi.artwatch.model.BlogModel
 import com.nomi.artwatch.model.LoginModel
 import com.nomi.artwatch.model.UserModel
+import com.nomi.artwatch.ui.util.SnackbarUtil
 import com.squareup.sqlbrite.BriteDatabase
 import com.tumblr.jumblr.types.User
 import hugo.weaving.DebugLog
@@ -170,7 +170,7 @@ abstract class DrawerActivity : InjectActivity() {
     @DebugLog
     fun onGifSelected(gif: Gif) {
         if (!mGoogleApiClient!!.isConnected) {
-            Toast.makeText(this@DrawerActivity, getString(R.string.error_no_connection_to_wear), Toast.LENGTH_SHORT).show()
+            SnackbarUtil.showAlert(this@DrawerActivity, getString(R.string.error_no_connection_to_wear))
             return
         }
         updateGifCache(gif)
@@ -187,7 +187,7 @@ abstract class DrawerActivity : InjectActivity() {
                 // Send the request.
                 Wearable.DataApi.putDataItem(mGoogleApiClient, request)
 
-                Toast.makeText(this@DrawerActivity, getString(R.string.gif_changed), Toast.LENGTH_SHORT).show()
+                SnackbarUtil.showNotification(this@DrawerActivity, getString(R.string.gif_changed))
             }
         })
     }

@@ -39,6 +39,11 @@ ext {
             keyPassword System.getenv("ANDROID_KEY_PASSWORD")
         }
     }
+
+    dexOptions = {
+        jumboMode true
+        maxProcessCount 4
+    }
 }
 
 /**

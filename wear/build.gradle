@@ -25,6 +25,8 @@ android {
         versionName VERSION_NAME
     }
 
+    dexOptions rootProject.ext.dexOptions
+
     buildTypes {
         debug {
             debuggable true

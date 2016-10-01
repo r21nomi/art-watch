@@ -35,6 +35,8 @@ android {
         versionName VERSION_NAME
     }
 
+    dexOptions rootProject.ext.dexOptions
+
     buildTypes {
         debug {
             debuggable true
@@ -81,6 +83,7 @@ dependencies {
     // Google
     compile "com.android.support:support-v4:$SUPPORT_LIBRARY_VERSION"
     compile "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
+    compile "com.android.support:design:$SUPPORT_LIBRARY_VERSION"
     compile "com.android.support:recyclerview-v7:$SUPPORT_LIBRARY_VERSION"
     compile "com.google.android.support:wearable:$SUPPORT_WEARABLE_VERSION"
     compile "com.google.android.gms:play-services-wearable:$PLAY_SERVICES_VERSION"

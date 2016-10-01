@@ -3,4 +3,6 @@
     <color name="translucent_black">#CC000000</color>
     <color name="black">#000</color>
     <color name="gray">#ccc</color>
+    <color name="green">#009688</color>
+    <color name="red">#F44336</color>
 </resources>
