@@ -29,7 +29,7 @@ ext {
     SUPPORT_WEARABLE_VERSION = "2.0.0-alpha3"
     PLAY_SERVICES_VERSION = "9.8.0"
     FIREBASE_VERSION = "9.8.0"
-    KOTLIN_VERSION = '1.0.3'
+    KOTLIN_VERSION = '1.0.5-2'
 
     signingConfigs = {
         release {
