@@ -23,7 +23,7 @@ class DeepLinkRouter {
 
             if (fromTumblrOAuth(host, pathParams)) {
                 // ex. artwatch://login
-                // FIXME：ここでIntentをつくるとたまにjava.lang.NoClassDefFoundError: com.nomi.artwatch.ui.activity.MainActivity
+                // FIXME：ここでIntentをつくるとたまにjava.lang.NoClassDefFoundError: com.nomi.artwatch.MainActivity
                 // が発生することがある。
                 // これを避けるために呼び出し側で作成したIntentを渡すようにした
 //                val intent = MainActivity.createIntent(context)
