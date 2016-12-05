@@ -7,5 +7,6 @@
     <pl.droidsonroids.gif.GifImageView
         android:id="@+id/gifView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="@dimen/item_placeholder_height"
+        android:background="@color/gray"/>
 </FrameLayout>
