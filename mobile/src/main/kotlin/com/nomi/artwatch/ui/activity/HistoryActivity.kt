@@ -9,10 +9,10 @@ import butterknife.bindView
 import com.nomi.artwatch.R
 import com.nomi.artwatch.data.cache.GifCache
 import com.nomi.artwatch.di.component.ActivityComponent
+import com.nomi.artwatch.ui.util.SnackbarUtil
 import com.nomi.artwatch.ui.view.ArtView
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Action1
-import timber.log.Timber
 
 /**
  * Created by Ryota Niinomi on 2016/05/04.
@@ -36,40 +36,40 @@ class HistoryActivity : DrawerActivity() {
     val mArtView: ArtView by bindView(R.id.art_view)
     val mEmptyView: TextView by bindView(R.id.empty_view)
 
-    override fun injectDependency(component: ActivityComponent?) {
-        component?.inject(this)
+    override fun injectDependency(component: ActivityComponent) {
+        component.inject(this)
     }
 
-    override val layout: Int get() = R.layout.activity_history
-    override val toolbarName: Int get() = R.string.history
-    override val shouldShowSpinner: Boolean get() = false
+    override val layout: Int = R.layout.activity_history
+    override val toolbarName: Int = R.string.history
+    override val shouldShowSpinner: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mArtView.init(Action1 { gif -> onGifSelected(gif) })
+        mArtView.init(Action1 { onGifSelected(it) })
 
         fetchHistoryItems()
     }
 
     private fun fetchHistoryItems() {
-        val subscription = mDb.createQuery(GifCache.TABLE, QUERY_SELECTED_ITEMS)
-                .mapToList { cursor ->
-                    return@mapToList GifCache.toGif(cursor)
+        mDb.createQuery(GifCache.TABLE, QUERY_SELECTED_ITEMS)
+                .mapToList {
+                    return@mapToList GifCache.toGif(it)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ gifs ->
-                    if (gifs.isNotEmpty()) {
-                        mArtView.setDataSet(gifs)
+                .subscribe({
+                    if (it.isNotEmpty()) {
+                        mArtView.setDataSet(it)
 
                     } else {
                         toggleEmptyView(true)
                     }
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
+                }, {
+                    SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                     toggleEmptyView(true)
                 })
-        mSubscriptionsOnDestroy.add(subscription)
+                .apply { mSubscriptionsOnDestroy.add(this) }
     }
 
     private fun toggleEmptyView(isEmpty: Boolean) {

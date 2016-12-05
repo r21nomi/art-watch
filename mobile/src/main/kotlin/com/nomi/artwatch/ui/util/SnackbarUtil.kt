@@ -22,13 +22,14 @@ class SnackbarUtil {
         private fun show(activity: Activity,
                          message: String,
                          @ColorRes color: Int) {
-            val snackbar = Snackbar.make(
+            Snackbar.make(
                     activity.findViewById(android.R.id.content),
                     message,
                     Snackbar.LENGTH_SHORT
-            )
-            snackbar.view.setBackgroundColor(color)
-            snackbar.show()
+            ).apply {
+                view.setBackgroundColor(color)
+                show()
+            }
         }
     }
 }

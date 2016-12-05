@@ -21,8 +21,8 @@ import java.util.*
 /**
  * Created by Ryota Niinomi on 15/11/8.
  */
-class ArtBinder(dataBindAdapter: DataBindAdapter,
-                private val mListener: Action1<Gif>?) : DataBinder<ArtBinder.ViewHolder>(dataBindAdapter) {
+class ArtBinder(dataBindAdapter: DataBindAdapter, private val mListener: Action1<Gif>?)
+    : DataBinder<ArtBinder.ViewHolder>(dataBindAdapter) {
 
     private val mDataSet: MutableList<Gif> = ArrayList()
 
@@ -35,19 +35,17 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
     override fun bindViewHolder(holder: ViewHolder, position: Int) {
         val photoSize = mDataSet[position]
 
-        holder.mPosition = position
-
-        Glide.with(holder.mGifView.context)
+        Glide.with(holder.gifView.context)
                 .load(photoSize.originalGifUrl)
                 .asGif()
                 .into(object : SimpleTarget<GifDrawable>() {
                     override fun onResourceReady(resource: GifDrawable, glideAnimation: GlideAnimation<in GifDrawable>) {
-                        val width = WindowUtil.getWidth(holder.mGifView.context)
+                        val width = WindowUtil.getWidth(holder.gifView.context)
                         val height = width * resource.intrinsicHeight / resource.intrinsicWidth
-                        val params = holder.mGifView.layoutParams
+                        val params = holder.gifView.layoutParams
                         params.width = width
                         params.height = height
-                        holder.mGifView.background = resource
+                        holder.gifView.background = resource
 
                         resource.start()
                     }
@@ -64,15 +62,13 @@ class ArtBinder(dataBindAdapter: DataBindAdapter,
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var mPosition: Int = 0
-
-        val mGifView: GifImageView by bindView(R.id.gifView)
+        val gifView: GifImageView by bindView(R.id.gifView)
 
         init {
-            mGifView.setOnClickListener({
-                val photoSize = mDataSet[mPosition]
+            gifView.setOnClickListener {
+                val photoSize = mDataSet[adapterPosition]
                 mListener?.call(photoSize)
-            })
+            }
         }
     }
 }

@@ -15,12 +15,11 @@ import java.util.*
  */
 class BlogAdapter(context: Context) : BaseAdapter() {
 
-    private val mInflater: LayoutInflater
-    private var mDataSet = ArrayList<Blog>()
-
-    init {
-        mInflater = LayoutInflater.from(context)
+    private val mInflater: LayoutInflater by lazy {
+        LayoutInflater.from(context)
     }
+
+    private val mDataSet = ArrayList<Blog>()
 
     override fun getCount(): Int {
         return mDataSet.size
@@ -57,10 +56,8 @@ class BlogAdapter(context: Context) : BaseAdapter() {
     }
 
     private class ViewHolder(view: View) {
-        val label: TextView
-
-        init {
-            label = view.findViewById(R.id.label) as TextView
+        val label: TextView by lazy {
+            view.findViewById(R.id.label) as TextView
         }
     }
 }

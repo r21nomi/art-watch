@@ -52,8 +52,30 @@ abstract class DrawerActivity : InjectActivity() {
         private val KEY_GIF = "gif"
     }
 
-    protected var mGoogleApiClient: GoogleApiClient? = null
-    private var mDrawerToggle: ActionBarDrawerToggle? = null
+    protected val mGoogleApiClient: GoogleApiClient by lazy {
+        GoogleApiClient
+                .Builder(this)
+                .addConnectionCallbacks(mGoogleConnectionCallback)
+                .addOnConnectionFailedListener(mGoogleConnectionFailedListener)
+                .addApi(Wearable.API)
+                .build()
+    }
+
+    private val mDrawerToggle: ActionBarDrawerToggle by lazy {
+        object : ActionBarDrawerToggle(
+                this,
+                mDrawerLayout,
+                toolbarName,
+                toolbarName) {
+            override fun onDrawerClosed(view: View?) {
+                super.onDrawerClosed(view)
+            }
+
+            override fun onDrawerOpened(drawerView: View?) {
+                super.onDrawerOpened(drawerView)
+            }
+        }
+    }
 
     private val mGoogleConnectionCallback = object : GoogleApiClient.ConnectionCallbacks {
         override fun onConnected(connectionHint: Bundle?) {
@@ -71,7 +93,11 @@ abstract class DrawerActivity : InjectActivity() {
         }
     }
 
-    private val mGoogleConnectionFailedListener = GoogleApiClient.OnConnectionFailedListener { }// TODO：Error handling
+    private val mToolbar: Toolbar by lazy {
+        findViewById(R.id.toolbar) as Toolbar
+    }
+
+    private val mGoogleConnectionFailedListener = GoogleApiClient.OnConnectionFailedListener { } // TODO：Error handling
 
     @Inject
     lateinit var mLoginModel: LoginModel
@@ -118,25 +144,18 @@ abstract class DrawerActivity : InjectActivity() {
 
         mSpinner.visibility = if (shouldShowSpinner) View.VISIBLE else View.GONE
 
-        mGoogleApiClient = GoogleApiClient
-                .Builder(this)
-                .addConnectionCallbacks(mGoogleConnectionCallback)
-                .addOnConnectionFailedListener(mGoogleConnectionFailedListener)
-                .addApi(Wearable.API)
-                .build()
-
         initDrawer()
     }
 
     override fun onStart() {
         super.onStart()
-        mGoogleApiClient!!.connect()
+        mGoogleApiClient.connect()
     }
 
     override fun onStop() {
-        if (mGoogleApiClient != null && mGoogleApiClient!!.isConnected) {
+        if (mGoogleApiClient.isConnected) {
             Wearable.DataApi.removeListener(mGoogleApiClient, mDataListener)
-            mGoogleApiClient!!.disconnect()
+            mGoogleApiClient.disconnect()
         }
         super.onStop()
     }
@@ -144,13 +163,13 @@ abstract class DrawerActivity : InjectActivity() {
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
 
-        mDrawerToggle!!.syncState()
+        mDrawerToggle.syncState()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
-        mDrawerToggle!!.onConfigurationChanged(newConfig)
+        mDrawerToggle.onConfigurationChanged(newConfig)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -158,7 +177,7 @@ abstract class DrawerActivity : InjectActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (mDrawerToggle!!.onOptionsItemSelected(item)) {
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true
         }
 
@@ -170,7 +189,7 @@ abstract class DrawerActivity : InjectActivity() {
      */
     @DebugLog
     fun onGifSelected(gif: Gif) {
-        if (!mGoogleApiClient!!.isConnected) {
+        if (!mGoogleApiClient.isConnected) {
             SnackbarUtil.showAlert(this, getString(R.string.error_no_connection_to_wear))
             return
         }
@@ -198,21 +217,21 @@ abstract class DrawerActivity : InjectActivity() {
         })
     }
 
-    fun setUserThumb(blogName: String?) {
-        val subscription = mBlogModel
+    fun setUserThumb(blogName: String) {
+        mBlogModel
                 .getAvatar(blogName)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ url ->
-                    Timber.d("URL : " + url)
+                .subscribe({
+                    Timber.d("URL : " + it)
                     Glide.with(this)
-                            .load(url)
+                            .load(it)
                             .bitmapTransform(CropCircleTransformation(this))
                             .placeholder(R.drawable.placeholder_user)
                             .into(mUserThumb)
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
+                }, {
+                    SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                 })
-        mSubscriptionsOnDestroy.add(subscription)
+                .apply { mSubscriptionsOnDestroy.add(this) }
     }
 
     /**
@@ -238,57 +257,31 @@ abstract class DrawerActivity : InjectActivity() {
     }
 
     private fun initDrawer() {
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
-        setSupportActionBar(toolbar)
-
-        mDrawerToggle = object : ActionBarDrawerToggle(
-                this,
-                mDrawerLayout,
-                toolbarName,
-                toolbarName) {
-            override fun onDrawerClosed(view: View?) {
-                super.onDrawerClosed(view)
-            }
-
-            override fun onDrawerOpened(drawerView: View?) {
-                super.onDrawerOpened(drawerView)
-            }
-        }
+        setSupportActionBar(mToolbar)
 
         mDrawerLayout.setDrawerListener(mDrawerToggle)
-        mDrawerToggle!!.isDrawerIndicatorEnabled = true
+        mDrawerToggle.isDrawerIndicatorEnabled = true
 
-        supportActionBar!!.title = getString(toolbarName)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setHomeButtonEnabled(true)
+        supportActionBar?.title = getString(toolbarName)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
 
-        mHomeBtn.setOnClickListener({
-            startHomeActivity()
-        })
-
-        mHistoryBtn.setOnClickListener({
-            startHistoryActivity()
-        })
-
-        mSettingsBtn.setOnClickListener({
-            startSettingsActivity()
-        })
-
-        mLogoutBtn.setOnClickListener({
-            logout()
-        })
+        mHomeBtn.setOnClickListener { startHomeActivity() }
+        mHistoryBtn.setOnClickListener { startHistoryActivity() }
+        mSettingsBtn.setOnClickListener { startSettingsActivity() }
+        mLogoutBtn.setOnClickListener { logout() }
 
         // User info
-        val subscription = mUserModel
+        mUserModel
                 .user
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ user ->
-                    setUserThumb(user)
-                    mUserName.text = user.name
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
+                .subscribe({
+                    setUserThumb(it)
+                    mUserName.text = it.name
+                }, {
+                    SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                 })
-        mSubscriptionsOnDestroy.add(subscription)
+                .apply { mSubscriptionsOnDestroy.add(this) }
     }
 
     private fun logout() {
@@ -323,7 +316,7 @@ abstract class DrawerActivity : InjectActivity() {
     }
 
     private fun setUserThumb(user: User) {
-        val blogName = mBlogModel.getBlogByUserOrCurrent(user)?.name
+        val blogName = mBlogModel.getBlogByUserOrCurrent(user)?.name ?: ""
         setUserThumb(blogName)
     }
 

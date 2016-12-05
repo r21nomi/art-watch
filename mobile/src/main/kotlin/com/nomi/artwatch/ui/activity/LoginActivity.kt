@@ -26,15 +26,13 @@ class LoginActivity : InjectActivity() {
 
     companion object {
         val MESSAGE: String = "message"
-        fun createIntentWithMessage(context: Context, message: String): Intent {
-            val intent = Intent(context, LoginActivity::class.java)
-            intent.putExtra(MESSAGE, message)
-            return intent
-        }
-        fun createIntent(context: Context): Intent {
-            val intent = Intent(context, LoginActivity::class.java)
-            return intent
-        }
+
+        fun createIntentWithMessage(context: Context, message: String): Intent =
+                Intent(context, LoginActivity::class.java).apply {
+                    putExtra(MESSAGE, message)
+                }
+
+        fun createIntent(context: Context): Intent = Intent(context, LoginActivity::class.java)
     }
 
     @Inject
@@ -69,16 +67,15 @@ class LoginActivity : InjectActivity() {
     }
 
     private fun authorize() {
-        val subscription = mLoginModel
+        mLoginModel
                 .login()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ authUrl ->
-                    Timber.d("Auth URL : " + authUrl)
-                    startActivity(Intent("android.intent.action.VIEW", Uri.parse(authUrl)))
-
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
+                .subscribe({
+                    Timber.d("Auth URL : " + it)
+                    startActivity(Intent("android.intent.action.VIEW", Uri.parse(it)))
+                }, {
+                    SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                 })
-        mSubscriptionsOnDestroy.add(subscription)
+                .apply { mSubscriptionsOnDestroy.add(this) }
     }
 }

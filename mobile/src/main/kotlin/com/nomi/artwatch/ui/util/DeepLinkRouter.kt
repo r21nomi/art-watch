@@ -34,8 +34,7 @@ class DeepLinkRouter {
             }
         }
 
-        private fun fromTumblrOAuth(host: String, pathParams: List<String>) : Boolean {
-            return LOGIN.equals(host) && pathParams.size == 0
-        }
+        private fun fromTumblrOAuth(host: String, pathParams: List<String>) : Boolean =
+                LOGIN == host && pathParams.isEmpty()
     }
 }

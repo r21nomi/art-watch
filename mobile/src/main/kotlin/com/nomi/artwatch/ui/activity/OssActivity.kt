@@ -16,20 +16,17 @@ import java.util.*
 class OssActivity : DrawerActivity() {
 
     companion object {
-        fun createIntent(context: Context): Intent {
-            val intent = Intent(context, OssActivity::class.java)
-            return intent
-        }
+        fun createIntent(context: Context): Intent = Intent(context, OssActivity::class.java)
     }
 
     val mRecyclerView: RecyclerView by bindView(R.id.recyclerView)
 
-    override val layout: Int get() = R.layout.activity_oss
-    override val toolbarName: Int get() = R.string.oss_license
-    override val shouldShowSpinner: Boolean get() = false
+    override val layout: Int = R.layout.activity_oss
+    override val toolbarName: Int = R.string.oss_license
+    override val shouldShowSpinner: Boolean = false
 
-    override fun injectDependency(component: ActivityComponent?) {
-        component?.inject(this)
+    override fun injectDependency(component: ActivityComponent) {
+        component.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

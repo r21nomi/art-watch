@@ -31,10 +31,7 @@ class SettingActivity : DrawerActivity() {
         private val KEY_TIMEOUT = "timeout"
         private val DEFAULT_TIMEOUT = TimeUnit.SECONDS.toMillis(30)
 
-        fun createIntent(context: Context): Intent {
-            val intent = Intent(context, SettingActivity::class.java)
-            return intent
-        }
+        fun createIntent(context: Context): Intent = Intent(context, SettingActivity::class.java)
     }
 
     val mRadioGroup: RadioGroup by bindView(R.id.radioGroup)
@@ -81,13 +78,13 @@ class SettingActivity : DrawerActivity() {
         }
     }
 
-    override fun injectDependency(component: ActivityComponent?) {
-        component?.inject(this)
+    override fun injectDependency(component: ActivityComponent) {
+        component.inject(this)
     }
 
-    override val layout: Int get() = R.layout.activity_setting
-    override val toolbarName: Int get() = R.string.settings
-    override val shouldShowSpinner: Boolean get() = false
+    override val layout: Int = R.layout.activity_setting
+    override val toolbarName: Int = R.string.settings
+    override val shouldShowSpinner: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,7 +117,7 @@ class SettingActivity : DrawerActivity() {
     }
 
     private fun selectRadioItem(item: Item) {
-        if (!mGoogleApiClient!!.isConnected) {
+        if (!mGoogleApiClient.isConnected) {
             SnackbarUtil.showAlert(this, getString(R.string.error_no_connection_to_wear))
             return
         }

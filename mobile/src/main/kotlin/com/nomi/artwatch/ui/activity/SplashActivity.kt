@@ -7,6 +7,7 @@ import com.nomi.artwatch.R
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.LoginModel
 import com.nomi.artwatch.ui.util.DeepLinkRouter
+import com.nomi.artwatch.ui.util.SnackbarUtil
 import com.nomi.artwatch.util.StringUtil
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -21,7 +22,7 @@ class SplashActivity : InjectActivity() {
     @Inject
     lateinit var mLoginModel: LoginModel
 
-    var mMainIntent: Intent? = null
+    lateinit var mMainIntent: Intent
 
     override fun injectDependency(component: ActivityComponent) {
         component.inject(this)
@@ -35,9 +36,9 @@ class SplashActivity : InjectActivity() {
         // MainActivityの起動Intentはここで作成する。
         mMainIntent = MainActivity.createIntent(this)
 
-        val subscription = setToken()
+        setToken()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ aVoid ->
+                .subscribe({
                     if (mLoginModel.isAuthorized) {
                         val data = intent.data
                         if (data != null && StringUtil.isNotEmpty(data.host)) {
@@ -51,11 +52,11 @@ class SplashActivity : InjectActivity() {
                         // Login
                         moveToLogin()
                     }
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
+                }, {
+                    SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                     moveToLoginWithMessage(getString(R.string.error_failed_to_login))
                 })
-        mSubscriptionsOnDestroy.add(subscription)
+                .apply { mSubscriptionsOnDestroy.add(this) }
     }
 
     override fun startActivity(intent: Intent?) {
@@ -92,14 +93,13 @@ class SplashActivity : InjectActivity() {
     }
 
     private fun startDeepLink(uri: Uri) {
-        val subscription = DeepLinkRouter
-                .createIntent(mMainIntent!!, uri)
+        DeepLinkRouter
+                .createIntent(mMainIntent, uri)
                 .subscribe({
-                    intent ->
-                    startActivity(intent)
+                    startActivity(it)
                 }, {
-                    throwable -> Timber.e(throwable, throwable.message)
+                    Timber.e(it, it.message)
                 })
-        mSubscriptionsOnDestroy.add(subscription)
+                .apply { mSubscriptionsOnDestroy.add(this) }
     }
 }

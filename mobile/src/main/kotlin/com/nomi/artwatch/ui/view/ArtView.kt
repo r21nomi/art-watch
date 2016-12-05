@@ -14,15 +14,14 @@ import rx.functions.Action1
  */
 class ArtView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
 
-    private var mAdapter: ListBindAdapter = ListBindAdapter()
-    private var mArtBinder: ArtBinder? = null
+    private val mAdapter: ListBindAdapter = ListBindAdapter()
+    private val mArtBinder: ArtBinder by lazy {
+        ArtBinder(mAdapter, mOnSelect)
+    }
     private var mOnSelect: Action1<Gif>? = null
 
     fun init(onSelect: Action1<Gif>) {
-        mAdapter = ListBindAdapter()
         mOnSelect = onSelect
-
-        mArtBinder = ArtBinder(mAdapter, mOnSelect)
 
         mAdapter.addBinder(mArtBinder)
 
@@ -33,7 +32,7 @@ class ArtView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     fun setDataSet(gifs: List<Gif>) {
-        mArtBinder?.setDataSet(gifs)
-        mArtBinder?.notifyDataSetChanged()
+        mArtBinder.setDataSet(gifs)
+        mArtBinder.notifyDataSetChanged()
     }
 }

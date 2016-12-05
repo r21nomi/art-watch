@@ -15,6 +15,7 @@ import com.nomi.artwatch.data.entity.Gif
 import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.PostModel
 import com.nomi.artwatch.ui.adapter.binder.BlogAdapter
+import com.nomi.artwatch.ui.util.SnackbarUtil
 import com.nomi.artwatch.ui.view.ArtView
 import com.tumblr.jumblr.types.Photo
 import rx.Observable
@@ -27,6 +28,10 @@ import javax.inject.Inject
  * Created by Ryota Niinomi on 2015/11/04.
  */
 class MainActivity : DrawerActivity() {
+
+    companion object {
+        fun createIntent(context: Context) = Intent(context, MainActivity::class.java)
+    }
 
     private var mBlogAdapter: BlogAdapter? = null
 
@@ -44,7 +49,7 @@ class MainActivity : DrawerActivity() {
             val blog = mBlogAdapter?.getItem(position)
             mBlogModel.currentBlog = blog
             showGifs()
-            setUserThumb(blog?.name)
+            setUserThumb(blog?.name ?: "")
 
             Timber.d("onItemSelected : " + blog?.name)
         }
@@ -65,8 +70,8 @@ class MainActivity : DrawerActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        initBlogList()
         mArtView.init(Action1 { photoSize -> onGifSelected(photoSize) })
+        initBlogList()
     }
 
     /**
@@ -76,12 +81,11 @@ class MainActivity : DrawerActivity() {
         val subscription = mLoginModel
                 .login()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ authUrl ->
-                    Timber.d("Auth URL : " + authUrl)
-                    startActivity(Intent("android.intent.action.VIEW", Uri.parse(authUrl)))
-
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
+                .subscribe({
+                    Timber.d("Auth URL : " + it)
+                    startActivity(Intent("android.intent.action.VIEW", Uri.parse(it)))
+                }, {
+                    SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                 })
         mSubscriptionsOnDestroy.add(subscription)
     }
@@ -94,17 +98,17 @@ class MainActivity : DrawerActivity() {
         val subscription = mUserModel
                 .user
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ user ->
-                    if (!user.blogs.isEmpty()) {
-                        mBlogModel.setCurrentBlog(user.blogs[0])
+                .subscribe({
+                    if (!it.blogs.isEmpty()) {
+                        mBlogModel.currentBlog = it.blogs[0]
                     }
                     // AdapterView.OnItemSelectedListener#onItemSelected will be called and then,
                     // showGifs will be executed.
-                    mBlogAdapter?.setDataSet(user.blogs)
+                    mBlogAdapter?.setDataSet(it.blogs)
                     mSpinner.adapter = mBlogAdapter
 
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
+                }, {
+                    SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                 })
         mSubscriptionsOnDestroy.add(subscription)
 
@@ -137,17 +141,16 @@ class MainActivity : DrawerActivity() {
      * Fetch Gif posts from Tumblr.
      */
     private fun fetchGifPosts() {
-        val subscription = mPostModel
-                .getPhotoPost(mBlogModel.currentBlog.name)
+        mPostModel
+                .getPhotoPost(mBlogModel.currentBlog?.name ?: return)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ items ->
-                    mArtView.setDataSet(toGif(items))
-                    toggleEmptyView(items.isEmpty())
-
-                }, { throwable ->
-                    Timber.e(throwable, throwable.message)
+                .subscribe({
+                    mArtView.setDataSet(toGif(it))
+                    toggleEmptyView(it.isEmpty())
+                }, {
+                    SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                 })
-        mSubscriptionsOnDestroy.add(subscription)
+                .apply { mSubscriptionsOnDestroy.add(this) }
     }
 
     /**
@@ -160,12 +163,5 @@ class MainActivity : DrawerActivity() {
                 .toList()
                 .toBlocking()
                 .single()
-    }
-
-    companion object {
-        fun createIntent(context: Context): Intent {
-            val intent = Intent(context, MainActivity::class.java)
-            return intent
-        }
     }
 }
