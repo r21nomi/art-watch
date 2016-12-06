@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'me.tatarka.retrolambda'
-// $ ./gradlew dependencyUpdates
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'android-apt'
 apply plugin: 'com.jakewharton.hugo'
@@ -64,10 +64,6 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
 }
 
 play {
@@ -98,8 +94,8 @@ dependencies {
 
     // DI
     compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
-    compile 'com.google.dagger:dagger:2.7'
-    apt "com.google.dagger:dagger-compiler:2.7"
+    compile 'com.google.dagger:dagger:2.8'
+    kapt 'com.google.dagger:dagger-compiler:2.8'
 
     // Rx
     compile 'io.reactivex:rxandroid:1.2.1'
