@@ -12,7 +12,12 @@ import dagger.Module
 import dagger.Provides
 import rx.schedulers.Schedulers
 import timber.log.Timber
+import java.security.cert.X509Certificate
 import javax.inject.Singleton
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /**
  * Created by Ryota Niinomi on 2015/11/03.
@@ -38,10 +43,29 @@ class ApplicationModule(protected var mApplication: Application) {
         return Handler()
     }
 
+    /**
+     * @see https://futurestud.io/tutorials/glide-module-example-accepting-self-signed-https-certificates
+     */
     @Provides
     @Singleton
     internal fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient()
+        val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+            override fun checkClientTrusted(p0: Array<out X509Certificate>?, p1: String?) {
+                // no-op
+            }
+
+            override fun checkServerTrusted(p0: Array<out X509Certificate>?, p1: String?) {
+                // no-op
+            }
+
+            override fun getAcceptedIssuers(): Array<out X509Certificate> {
+                return emptyArray()
+            }
+        })
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, trustAllCerts, java.security.SecureRandom())
+        val sslSocketFactory : SSLSocketFactory = sslContext.getSocketFactory()
+        return OkHttpClient().setSslSocketFactory(sslSocketFactory)
     }
 
     @Provides
