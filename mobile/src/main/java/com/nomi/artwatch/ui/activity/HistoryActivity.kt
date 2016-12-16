@@ -36,6 +36,10 @@ class HistoryActivity : DrawerActivity() {
     val mArtView: ArtView by bindView(R.id.art_view)
     val mEmptyView: TextView by bindView(R.id.empty_view)
 
+    val mLoadMore: (Int) -> Unit = {
+        // no-op
+    }
+
     override fun injectDependency(component: ActivityComponent) {
         component.inject(this)
     }
@@ -47,7 +51,7 @@ class HistoryActivity : DrawerActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mArtView.init(Action1 { onGifSelected(it) })
+        mArtView.init(Action1 { onGifSelected(it) }, mLoadMore)
 
         fetchHistoryItems()
     }
@@ -60,7 +64,7 @@ class HistoryActivity : DrawerActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     if (it.isNotEmpty()) {
-                        mArtView.setDataSet(it)
+                        mArtView.addDataSet(it)
 
                     } else {
                         toggleEmptyView(true)

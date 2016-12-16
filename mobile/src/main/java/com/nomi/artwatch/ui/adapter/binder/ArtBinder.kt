@@ -58,6 +58,10 @@ class ArtBinder(dataBindAdapter: DataBindAdapter, private val mListener: Action1
 
     fun setDataSet(gifs: List<Gif>) {
         mDataSet.clear()
+        addDataSet(gifs)
+    }
+
+    fun addDataSet(gifs: List<Gif>) {
         mDataSet.addAll(gifs)
     }
 
