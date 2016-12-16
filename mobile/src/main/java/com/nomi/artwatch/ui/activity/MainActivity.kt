@@ -30,6 +30,7 @@ import javax.inject.Inject
 class MainActivity : DrawerActivity() {
 
     companion object {
+        private val LIMIT = 20
         fun createIntent(context: Context) = Intent(context, MainActivity::class.java)
     }
 
@@ -59,6 +60,10 @@ class MainActivity : DrawerActivity() {
         }
     }
 
+    val mLoadMore: (Int) -> Unit = {
+        fetchGifPosts((it - 1) * LIMIT)
+    }
+
     override val layout: Int = R.layout.activity_main
     override val toolbarName: Int = R.string.home
     override val shouldShowSpinner: Boolean get() = true
@@ -70,7 +75,7 @@ class MainActivity : DrawerActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mArtView.init(Action1 { photoSize -> onGifSelected(photoSize) })
+        mArtView.init(Action1 { photoSize -> onGifSelected(photoSize) }, mLoadMore)
         initBlogList()
     }
 
@@ -118,7 +123,7 @@ class MainActivity : DrawerActivity() {
     private fun showGifs() {
         if (mLoginModel.isAuthorized) {
             // Already authorized.
-            fetchGifPosts()
+            fetchGifPosts(0)
 
         } else {
             // Authorize now.
@@ -140,13 +145,17 @@ class MainActivity : DrawerActivity() {
     /**
      * Fetch Gif posts from Tumblr.
      */
-    private fun fetchGifPosts() {
+    private fun fetchGifPosts(offset: Int) {
         mPostModel
-                .getPhotoPost(mBlogModel.currentBlog?.name ?: return)
+                .getPhotoPost(mBlogModel.currentBlog?.name ?: return, offset, LIMIT)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    mArtView.setDataSet(toGif(it))
-                    toggleEmptyView(it.isEmpty())
+                    if (offset == 0) {
+                        mArtView.setDataSet(toGif(it))
+                        toggleEmptyView(it.isEmpty())
+                    } else {
+                        mArtView.addDataSet(toGif(it))
+                    }
                 }, {
                     SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
                 })

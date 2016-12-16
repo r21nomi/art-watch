@@ -20,10 +20,6 @@ class PostModel
 @Inject
 constructor(private val mContext: Context, prefModel: PrefModel) : BaseModel(prefModel) {
 
-    companion object {
-        private val LIMIT = 40
-    }
-
     fun getBlog(blogName: String): Observable<Blog> = Observable
             .just(null)
             .subscribeOn(Schedulers.io())
@@ -37,12 +33,16 @@ constructor(private val mContext: Context, prefModel: PrefModel) : BaseModel(pre
                 return@map null
             }
 
-    fun getPhotoPost(blogName: String): Observable<List<Photo>> = Observable
+    fun getPhotoPost(blogName: String, offset: Int, limit: Int): Observable<List<Photo>> = Observable
             .just(null)
             .subscribeOn(Schedulers.io())
             .map {
-                val photoPosts = client.photos(blogName, null)
-                val photos = toPhotos(photoPosts)
+                val param = mapOf(
+                        "offset" to offset,
+                        "limit" to limit
+                )
+                val photoPosts = client.photos(blogName, param)
+                val photos = toPhotos(photoPosts, limit)
                 return@map photos
             }
             .onErrorReturn {
@@ -50,7 +50,7 @@ constructor(private val mContext: Context, prefModel: PrefModel) : BaseModel(pre
                 throw RuntimeException(mContext.getString(R.string.error_common))
             }
 
-    private fun toPhotos(photoPosts: List<PhotoPost>): List<Photo> {
+    private fun toPhotos(photoPosts: List<PhotoPost>, limit: Int): List<Photo> {
         val photos = ArrayList<Photo>()
 
         Observable
@@ -58,7 +58,7 @@ constructor(private val mContext: Context, prefModel: PrefModel) : BaseModel(pre
                 .forEach { item ->
                     Observable
                             .from(item.photos)
-                            .filter { item2 -> photos.size < LIMIT && isGif(item2) }
+                            .filter { item2 -> photos.size < limit && isGif(item2) }
                             .forEach { item3 ->
                                 Timber.d("photo url : " + item3.originalSize.url)
                                 photos.add(item3)
