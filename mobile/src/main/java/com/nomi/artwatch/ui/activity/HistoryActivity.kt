@@ -20,12 +20,11 @@ import rx.functions.Action1
 class HistoryActivity : DrawerActivity() {
 
     companion object {
-        private val QUERY_SELECTED_ITEMS = "SELECT * FROM " + GifCache.TABLE
-        private val QUERY_LATEST_ITEM = "SELECT * FROM " +
-                GifCache.TABLE +
-                " ORDER BY " +
-                GifCache.UPDATED_AT +
-                " DESC limit 1"
+        private val LIMIT = 20
+        private val QUERY_LATEST_ITEM = "SELECT * FROM " + GifCache.TABLE +
+                " ORDER BY " + GifCache.UPDATED_AT +
+                " DESC limit " + LIMIT +
+                " OFFSET "
 
         fun createIntent(context: Context): Intent {
             val intent = Intent(context, HistoryActivity::class.java)
@@ -37,7 +36,7 @@ class HistoryActivity : DrawerActivity() {
     val mEmptyView: TextView by bindView(R.id.empty_view)
 
     val mLoadMore: (Int) -> Unit = {
-        // no-op
+        fetchHistoryItems(mArtView.getDataSetSize())
     }
 
     override fun injectDependency(component: ActivityComponent) {
@@ -53,21 +52,20 @@ class HistoryActivity : DrawerActivity() {
 
         mArtView.init(Action1 { onGifSelected(it) }, mLoadMore)
 
-        fetchHistoryItems()
+        fetchHistoryItems(0)
     }
 
-    private fun fetchHistoryItems() {
-        mDb.createQuery(GifCache.TABLE, QUERY_SELECTED_ITEMS)
+    private fun fetchHistoryItems(offset: Int) {
+        mDb.createQuery(GifCache.TABLE, QUERY_LATEST_ITEM + offset)
                 .mapToList {
                     return@mapToList GifCache.toGif(it)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    if (it.isNotEmpty()) {
-                        mArtView.addDataSet(it)
-
-                    } else {
+                    if (offset == 0 && it.isEmpty()) {
                         toggleEmptyView(true)
+                    } else {
+                        mArtView.addDataSet(it)
                     }
                 }, {
                     SnackbarUtil.showAlert(this, it.message ?: return@subscribe)
