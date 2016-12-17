@@ -2,6 +2,7 @@ package com.nomi.artwatch
 
 import com.facebook.stetho.Stetho
 import com.squareup.leakcanary.LeakCanary
+import timber.log.Timber
 
 /**
  * Created by Ryota Niinomi on 2015/11/03.
@@ -16,6 +17,8 @@ open class DebugApp : App() {
             // You should not init your app in this process.
             return
         }
+
+        Timber.plant(Timber.DebugTree())
 
         LeakCanary.install(this)
         Stetho.initialize(Stetho.newInitializerBuilder(this)
