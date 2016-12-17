@@ -24,7 +24,7 @@ class HistoryActivity : DrawerActivity() {
         private val QUERY_LATEST_ITEM = "SELECT * FROM " + GifCache.TABLE +
                 " ORDER BY " + GifCache.UPDATED_AT +
                 " DESC limit " + LIMIT +
-                " OFFSET "
+                " OFFSET %s"
 
         fun createIntent(context: Context): Intent {
             val intent = Intent(context, HistoryActivity::class.java)
@@ -56,7 +56,7 @@ class HistoryActivity : DrawerActivity() {
     }
 
     private fun fetchHistoryItems(offset: Int) {
-        mDb.createQuery(GifCache.TABLE, QUERY_LATEST_ITEM + offset)
+        mDb.createQuery(GifCache.TABLE, QUERY_LATEST_ITEM.format(offset))
                 .mapToList {
                     return@mapToList GifCache.toGif(it)
                 }
