@@ -1,5 +1,6 @@
 package com.nomi.artwatch.ui.adapter.binder
 
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -34,8 +35,12 @@ class ArtBinder(dataBindAdapter: DataBindAdapter, private val mListener: Action1
 
     override fun bindViewHolder(holder: ViewHolder, position: Int) {
         val photoSize = mDataSet[position]
+        val context = holder.gifView.context
 
-        Glide.with(holder.gifView.context)
+        // Set default color as placeholder to prevent a problem it takes a lot of time to be changed to a new gif.
+        holder.gifView.setBackgroundColor(ContextCompat.getColor(context, R.color.gray))
+
+        Glide.with(context)
                 .load(photoSize.originalGifUrl)
                 .asGif()
                 .into(object : SimpleTarget<GifDrawable>() {
