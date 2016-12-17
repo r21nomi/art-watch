@@ -47,4 +47,8 @@ class ArtView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         mArtBinder.addDataSet(gifs)
         mArtBinder.notifyBinderItemRangeChanged(itemCount, gifs.size)
     }
+
+    fun getDataSetSize(): Int {
+        return mArtBinder.itemCount
+    }
 }
