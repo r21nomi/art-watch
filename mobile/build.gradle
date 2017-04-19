@@ -14,8 +14,8 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
-        classpath 'me.tatarka:gradle-retrolambda:3.4.0'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
+        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.14.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
     }
@@ -90,42 +90,42 @@ dependencies {
     compile 'oauth.signpost:signpost-core:1.2.1.2'
 
     // DB
-    compile 'com.squareup.sqlbrite:sqlbrite:0.8.0'
+    compile 'com.squareup.sqlbrite:sqlbrite:1.1.1'
 
     // DI
     compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
-    compile 'com.google.dagger:dagger:2.8'
-    kapt 'com.google.dagger:dagger-compiler:2.8'
+    compile 'com.google.dagger:dagger:2.10'
+    kapt 'com.google.dagger:dagger-compiler:2.10'
 
     // Rx
     compile 'io.reactivex:rxandroid:1.2.1'
 
     // Retrolambda
-    retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
+    retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.5.1'
 
     // GIF
-    compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.3'
+    compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.6'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.github.bumptech.glide:okhttp-integration:1.4.0'
 
     // UI
     compile 'com.yqritc:recyclerview-multiple-viewtypes-adapter:1.1.0'
-    compile 'jp.wasabeef:glide-transformations:2.0.1'
+    compile 'jp.wasabeef:glide-transformations:2.0.2'
 
     // Debug
-    compile 'com.jakewharton.timber:timber:4.3.1'
-    debugCompile 'com.facebook.stetho:stetho:1.4.1'
+    compile 'com.jakewharton.timber:timber:4.5.1'
+    debugCompile 'com.facebook.stetho:stetho:1.5.0'
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
 
     // License
-    compile 'net.yslibrary.licenseadapter:licenseadapter:1.2.4'
+    compile 'net.yslibrary.licenseadapter:licenseadapter:1.4.0'
 
     // Firebase
-    compile "com.google.firebase:firebase-core:$FIREBASE_VERSION"
-    compile "com.google.firebase:firebase-crash:$FIREBASE_VERSION"
+    compile "com.google.firebase:firebase-core:$PLAY_SERVICES_VERSION"
+    compile "com.google.firebase:firebase-crash:$PLAY_SERVICES_VERSION"
 }
 repositories {
     mavenCentral()
