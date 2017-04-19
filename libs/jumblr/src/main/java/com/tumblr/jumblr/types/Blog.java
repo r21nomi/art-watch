@@ -14,7 +14,6 @@ public class Blog extends Resource {
     private String description;
     private int posts, likes, followers;
     private Long updated;
-    private boolean ask, ask_anon;
 
     /**
      * Get the description of this blog
@@ -22,22 +21,6 @@ public class Blog extends Resource {
      */
     public String getDescription() {
         return this.description;
-    }
-
-    /**
-     * Can we ask questions on this blog?
-     * @return boolean
-     */
-    public boolean canAsk() {
-        return this.ask;
-    }
-
-    /**
-     * Can we ask questions on this blog anonymously?
-     * @return boolean
-     */
-    public boolean canAskAnonymously() {
-        return this.ask_anon;
     }
 
     /**
