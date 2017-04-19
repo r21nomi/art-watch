@@ -24,6 +24,7 @@ test:
   override:
     # Its neccessary below to avoid error "./gradlew clean assembleRelease died unexpectedly".
     - ./gradlew assembleRelease -PpreDexEnable=false -Pcom.android.build.threadPoolSize=1 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" -Dorg.gradle.daemon=false
+    - ./gradlew jacocoTestReport
 
 deployment:
   release:
