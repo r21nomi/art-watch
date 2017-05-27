@@ -26,16 +26,15 @@ object GifUrlProvider {
      * @return
      */
     fun getUrl(photoSizes: List<PhotoSize>, type: Type): String {
-        var index = 0
+        var index = photoSizes.size - 1
 
         when (type) {
-            Type.WEAR -> if (photoSizes.size > 1) {
+            Type.WEAR -> if (photoSizes.size >= 5) {
                 index = photoSizes.size - 2
             }
-
-            else -> if (photoSizes.size > 2) {
+            else -> if (photoSizes.size >= 5) {
                 // If you set index = 1(size = 400), the animation of gif will be slow.
-                index = 2
+                index = photoSizes.size - 3
             }
         }
 
