@@ -1,10 +1,9 @@
 .gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+local.properties
+secrets.properties
 .DS_Store
 /build
-/captures
+google-services.json
 
 # Android studio files
 .idea/*

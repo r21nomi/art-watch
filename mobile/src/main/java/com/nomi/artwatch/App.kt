@@ -37,7 +37,6 @@ open class App : Application() {
     }
 
     private fun init() {
-        Config.init(this)
         Timber.plant(CrashReportingTree())
 
         val glide = Glide.get(this)

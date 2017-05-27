@@ -21,6 +21,12 @@ buildscript {
     }
 }
 
+def static getSecretValue(name){
+    def Properties props = new Properties()
+    props.load(new FileInputStream(new File("secrets.properties")))
+    return props[name]
+}
+
 android {
     compileSdkVersion COMPILE_SDK_VERSION
     buildToolsVersion BUILDTOOLS_VERSION
@@ -33,6 +39,9 @@ android {
         targetSdkVersion TARGET_SDK_VERSION
         versionCode VERSION_CODE
         versionName VERSION_NAME
+
+        buildConfigField("String", "TUMBLR_CONSUMER_KEY", "\"" + getSecretValue("TUMBLR_CONSUMER_KEY") + "\"")
+        buildConfigField("String", "TUMBLR_CONSUMER_SECRET", "\"" + getSecretValue("TUMBLR_CONSUMER_SECRET") + "\"")
     }
 
     dexOptions rootProject.ext.dexOptions
