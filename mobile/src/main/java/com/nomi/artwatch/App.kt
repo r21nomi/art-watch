@@ -39,8 +39,9 @@ open class App : Application() {
     private fun init() {
         Timber.plant(CrashReportingTree())
 
-        val glide = Glide.get(this)
-        glide.setMemoryCategory(MemoryCategory.LOW)
-        glide.register(GlideUrl::class.java, InputStream::class.java, OkHttpUrlLoader.Factory(mOkHttpClient))
+        Glide.get(this).run {
+            setMemoryCategory(MemoryCategory.LOW)
+            register(GlideUrl::class.java, InputStream::class.java, OkHttpUrlLoader.Factory(mOkHttpClient))
+        }
     }
 }
