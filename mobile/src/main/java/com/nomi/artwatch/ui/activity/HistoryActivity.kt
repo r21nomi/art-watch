@@ -27,15 +27,14 @@ class HistoryActivity : DrawerActivity() {
                 " OFFSET %s"
 
         fun createIntent(context: Context): Intent {
-            val intent = Intent(context, HistoryActivity::class.java)
-            return intent
+            return Intent(context, HistoryActivity::class.java)
         }
     }
 
-    val mArtView: ArtView by bindView(R.id.art_view)
-    val mEmptyView: TextView by bindView(R.id.empty_view)
+    private val mArtView: ArtView by bindView(R.id.art_view)
+    private val mEmptyView: TextView by bindView(R.id.empty_view)
 
-    val mLoadMore: (Int) -> Unit = {
+    private val mLoadMore: (Int) -> Unit = {
         fetchHistoryItems(mArtView.getDataSetSize())
     }
 

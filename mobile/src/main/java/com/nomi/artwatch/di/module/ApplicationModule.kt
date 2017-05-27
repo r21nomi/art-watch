@@ -23,7 +23,7 @@ import javax.net.ssl.X509TrustManager
  * Created by Ryota Niinomi on 2015/11/03.
  */
 @Module
-class ApplicationModule(protected var mApplication: Application) {
+class ApplicationModule(private val mApplication: Application) {
 
     @Provides
     @Singleton

@@ -11,6 +11,10 @@ import com.nomi.artwatch.ui.util.TypefaceCache
  */
 class CustomFontTextView : TextView {
 
+    companion object {
+        private val FONT_FAMILIES = intArrayOf(R.string.font_light)
+    }
+
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
@@ -26,9 +30,5 @@ class CustomFontTextView : TextView {
         val typeface = TypefaceCache.instance.getTypeface(fontFamily, context)
         setTypeface(typeface)
         typedArray.recycle()
-    }
-
-    companion object {
-        private val FONT_FAMILIES = intArrayOf(R.string.font_light)
     }
 }

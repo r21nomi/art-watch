@@ -38,8 +38,8 @@ class LoginActivity : InjectActivity() {
     @Inject
     lateinit var mLoginModel: LoginModel
 
-    val mGifView : GifImageView by bindView(R.id.gifView)
-    val mLoginText : TextView by bindView(R.id.loginText)
+    private val mGifView : GifImageView by bindView(R.id.gifView)
+    private val mLoginText : TextView by bindView(R.id.loginText)
 
     override fun injectDependency(component: ActivityComponent) {
         component.inject(this)
@@ -57,9 +57,7 @@ class LoginActivity : InjectActivity() {
             }
         })
 
-        mLoginText.setOnClickListener({
-            authorize()
-        })
+        mLoginText.setOnClickListener { authorize() }
 
         if (intent.hasExtra(MESSAGE)) {
             SnackbarUtil.showAlert(this, intent.getStringExtra(MESSAGE))

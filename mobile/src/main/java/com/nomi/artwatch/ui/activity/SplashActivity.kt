@@ -8,7 +8,6 @@ import com.nomi.artwatch.di.component.ActivityComponent
 import com.nomi.artwatch.model.LoginModel
 import com.nomi.artwatch.ui.util.DeepLinkRouter
 import com.nomi.artwatch.ui.util.SnackbarUtil
-import com.nomi.artwatch.util.StringUtil
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
@@ -41,7 +40,7 @@ class SplashActivity : InjectActivity() {
                 .subscribe({
                     if (mLoginModel.isAuthorized) {
                         val data = intent.data
-                        if (data != null && StringUtil.isNotEmpty(data.host)) {
+                        if (data != null && data.host.isNotEmpty()) {
                             // Deep link
                             startDeepLink(data)
                         } else {
@@ -78,18 +77,15 @@ class SplashActivity : InjectActivity() {
     }
 
     private fun moveToLogin() {
-        val intent = LoginActivity.createIntent(this)
-        startActivity(intent)
+        startActivity(LoginActivity.createIntent(this))
     }
 
     private fun moveToLoginWithMessage(message: String) {
-        val intent = LoginActivity.createIntentWithMessage(this, message)
-        startActivity(intent)
+        startActivity(LoginActivity.createIntentWithMessage(this, message))
     }
 
     private fun moveToMain() {
-        val intent = MainActivity.createIntent(this)
-        startActivity(intent)
+        startActivity(MainActivity.createIntent(this))
     }
 
     private fun startDeepLink(uri: Uri) {

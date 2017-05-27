@@ -29,7 +29,7 @@ object GifUrlProvider {
         var index = 0
 
         when (type) {
-            GifUrlProvider.Type.WEAR -> if (photoSizes.size > 1) {
+            Type.WEAR -> if (photoSizes.size > 1) {
                 index = photoSizes.size - 2
             }
 
