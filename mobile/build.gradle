@@ -5,7 +5,6 @@ apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'android-apt'
 apply plugin: 'com.jakewharton.hugo'
-apply plugin: 'com.github.triplet.play'
 
 buildscript {
     repositories {
@@ -73,11 +72,6 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
-}
-
-play {
-    track = 'alpha'
-    jsonFile = file('google_play_service_account_key.json')
 }
 
 dependencies {
