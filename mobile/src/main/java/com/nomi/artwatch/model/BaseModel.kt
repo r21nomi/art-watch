@@ -9,8 +9,8 @@ import com.tumblr.jumblr.JumblrClient
 open class BaseModel(protected var mPrefModel: PrefModel) {
 
     protected val client: JumblrClient by lazy {
-        val client = JumblrClient(Config.CONSUMER_KEY, Config.CONSUMER_SECRET)
-        client.setToken(mPrefModel.token, mPrefModel.tokenSecret)
-        return@lazy client
+        return@lazy JumblrClient(Config.CONSUMER_KEY, Config.CONSUMER_SECRET).apply {
+            setToken(mPrefModel.token, mPrefModel.tokenSecret)
+        }
     }
 }

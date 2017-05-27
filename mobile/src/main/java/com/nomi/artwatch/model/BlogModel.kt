@@ -2,7 +2,6 @@ package com.nomi.artwatch.model
 
 import android.content.Context
 import com.nomi.artwatch.R
-import com.nomi.artwatch.util.StringUtil
 import com.tumblr.jumblr.types.Blog
 import com.tumblr.jumblr.types.User
 import rx.Observable
@@ -23,11 +22,11 @@ constructor(private val mContext: Context, prefModel: PrefModel) : BaseModel(pre
 
     fun getAvatar(blogName: String): Observable<String> = Observable
             .fromCallable<String> {
-                if (StringUtil.isNotBlank(blogName)) {
+                if (blogName.isNotBlank()) {
                     // This will throw an error.
                     //                        return getClient().blogAvatar(blogName);
                     // FIXME：Sometimes this throw 401.
-                    return@fromCallable "https://api.tumblr.com/v2/blog/"+blogName+".tumblr.com/avatar"
+                    return@fromCallable "https://api.tumblr.com/v2/blog/" + blogName + ".tumblr.com/avatar"
                 } else {
                     return@fromCallable ""
                 }

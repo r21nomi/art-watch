@@ -5,7 +5,6 @@ import android.net.Uri
 import com.nomi.artwatch.Config
 import com.nomi.artwatch.R
 import com.nomi.artwatch.ui.util.DeepLinkRouter
-import com.nomi.artwatch.util.StringUtil
 import oauth.signpost.OAuth
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer
 import oauth.signpost.commonshttp.CommonsHttpOAuthProvider
@@ -54,12 +53,8 @@ constructor(private val mContext: Context, private val mPrefModel: PrefModel) {
             Timber.d("token : %s", mPrefModel.token)
             Timber.d("token secret : %s", mPrefModel.tokenSecret)
 
-            return StringUtil.isNotBlank(mPrefModel.token) && StringUtil.isNotBlank(mPrefModel.tokenSecret)
+            return mPrefModel.token.isNotBlank() && mPrefModel.tokenSecret.isNotBlank()
         }
-
-    val token: String get() = mPrefModel.token
-
-    val tokenSecret: String get() = mPrefModel.tokenSecret
 
     fun login(): Observable<String> {
         return Observable

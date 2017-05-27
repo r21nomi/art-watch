@@ -108,15 +108,16 @@ abstract class DrawerActivity : InjectActivity() {
     @Inject
     lateinit var mDb: BriteDatabase
 
-    val mDrawerLayout: DrawerLayout by bindView(R.id.drawer_layout)
-    val mSpinner: AppCompatSpinner by bindView(R.id.spinner)
-    val mContainer: ViewGroup by bindView(R.id.container)
-    val mUserThumb: ImageView by bindView(R.id.userThumb)
-    val mUserName: TextView by bindView(R.id.userName)
-    val mHomeBtn: TextView by bindView(R.id.homeButton)
-    val mHistoryBtn: TextView by bindView(R.id.historyButton)
-    val mSettingsBtn: TextView by bindView(R.id.settingsButton)
-    val mLogoutBtn: TextView by bindView(R.id.logoutButton)
+    private val mDrawerLayout: DrawerLayout by bindView(R.id.drawer_layout)
+    private val mContainer: ViewGroup by bindView(R.id.container)
+    private val mUserThumb: ImageView by bindView(R.id.userThumb)
+    private val mUserName: TextView by bindView(R.id.userName)
+    private val mHomeBtn: TextView by bindView(R.id.homeButton)
+    private val mHistoryBtn: TextView by bindView(R.id.historyButton)
+    private val mSettingsBtn: TextView by bindView(R.id.settingsButton)
+    private val mLogoutBtn: TextView by bindView(R.id.logoutButton)
+
+    protected val mSpinner: AppCompatSpinner by bindView(R.id.spinner)
 
     protected abstract val layout: Int
     protected abstract val toolbarName: Int
@@ -298,21 +299,23 @@ abstract class DrawerActivity : InjectActivity() {
 
     private fun startHomeActivity() {
         mDrawerLayout.closeDrawer(GravityCompat.START)
-        val intent: Intent = MainActivity.createIntent(this)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
+
+        MainActivity.createIntent(this).run {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(this)
+        }
     }
 
     private fun startHistoryActivity() {
         mDrawerLayout.closeDrawer(GravityCompat.START)
-        val intent: Intent = HistoryActivity.createIntent(this)
-        startActivity(intent)
+
+        startActivity(HistoryActivity.createIntent(this))
     }
 
     private fun startSettingsActivity() {
         mDrawerLayout.closeDrawer(GravityCompat.START)
-        val intent: Intent = SettingActivity.createIntent(this)
-        startActivity(intent)
+
+        startActivity(SettingActivity.createIntent(this))
     }
 
     private fun setUserThumb(user: User) {
@@ -321,10 +324,11 @@ abstract class DrawerActivity : InjectActivity() {
     }
 
     private fun startActivity() {
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
+        Intent(this, LoginActivity::class.java).run {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(this)
+        }
         finish()
     }
 }

@@ -34,8 +34,8 @@ class SettingActivity : DrawerActivity() {
         fun createIntent(context: Context): Intent = Intent(context, SettingActivity::class.java)
     }
 
-    val mRadioGroup: RadioGroup by bindView(R.id.radioGroup)
-    val mOssLicenseBtn: TextView by bindView(R.id.ossLicenseBtn)
+    private val mRadioGroup: RadioGroup by bindView(R.id.radioGroup)
+    private val mOssLicenseBtn: TextView by bindView(R.id.ossLicenseBtn)
 
     private var mCurrentItem: Item = Item.ITEM_1
     private var mTime: Long = 0
@@ -61,17 +61,17 @@ class SettingActivity : DrawerActivity() {
                 override fun onResult(dataItemResult: DataApi.DataItemResult) {
                     Log.d(this.javaClass.canonicalName, "fetchConfigDataMap onResult.")
 
-                    if (dataItemResult.status.isSuccess) {
-                        if (dataItemResult.dataItem != null) {
-                            val configDataItem = dataItemResult.dataItem
-                            val dataMapItem = DataMapItem.fromDataItem(configDataItem)
-                            val dataMap = dataMapItem.dataMap
-                            // Set initial time.
-                            setTime(dataMap.getLong(KEY_TIMEOUT))
-                        } else {
-                            Log.d(this.javaClass.canonicalName, "No data was found. Set default time.")
-                            setTime(DEFAULT_TIMEOUT)
-                        }
+                    if (!dataItemResult.status.isSuccess) return
+
+                    if (dataItemResult.dataItem != null) {
+                        val configDataItem = dataItemResult.dataItem
+                        val dataMapItem = DataMapItem.fromDataItem(configDataItem)
+                        val dataMap = dataMapItem.dataMap
+                        // Set initial time.
+                        setTime(dataMap.getLong(KEY_TIMEOUT))
+                    } else {
+                        Log.d(this.javaClass.canonicalName, "No data was found. Set default time.")
+                        setTime(DEFAULT_TIMEOUT)
                     }
                 }
             })
@@ -90,11 +90,12 @@ class SettingActivity : DrawerActivity() {
         super.onCreate(savedInstanceState)
 
         for (item in Item.values()) {
-            val radioButton = findViewById(item.id) as RadioButton
-            radioButton.text = getString(item.labelRes)
+            (findViewById(item.id) as RadioButton).run {
+                text = getString(item.labelRes)
+            }
         }
 
-        mRadioGroup.setOnCheckedChangeListener { radioGroup, checkedId ->
+        mRadioGroup.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId != -1) {
                 val item: Item = getItem(checkedId)
                 selectRadioItem(item)
@@ -126,13 +127,14 @@ class SettingActivity : DrawerActivity() {
             return
         }
 
-        val dataMap = PutDataMapRequest.create(PATH_OF_TIMEOUT)
-        dataMap.dataMap.putLong(KEY_TIMEOUT, item.time)
-        Wearable.DataApi.putDataItem(mGoogleApiClient, dataMap.asPutDataRequest())
+        PutDataMapRequest.create(PATH_OF_TIMEOUT).let { dataMap ->
+            dataMap.dataMap.putLong(KEY_TIMEOUT, item.time)
+            Wearable.DataApi.putDataItem(mGoogleApiClient, dataMap.asPutDataRequest())
+        }
     }
 
     private fun getItem(id: Int): Item {
-        for (item in Item.values()) {
+        Item.values().forEach { item ->
             if (item.id == id) {
                 return item
             }
@@ -141,7 +143,7 @@ class SettingActivity : DrawerActivity() {
     }
 
     private fun getItemByTime(time: Long): Item {
-        for (item in Item.values()) {
+        Item.values().forEach { item ->
             if (item.time == time) {
                 return item
             }

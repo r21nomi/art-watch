@@ -8,4 +8,4 @@ import dagger.Module
  * Created by Ryota Niinomi on 2015/11/03.
  */
 @Module
-class ActivityModule(protected var mActivity: Activity)
+class ActivityModule(private val mActivity: Activity)
