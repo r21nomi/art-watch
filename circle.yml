@@ -19,6 +19,7 @@ dependencies:
     - mkdir $ANDROID_HOME/licenses
     - echo $ANDROID_SDK_LICENSE >> $ANDROID_HOME/licenses/android-sdk-license
     - echo y | android update sdk --no-ui --all --filter "extra-google-m2repository,extra-android-m2repository"
+    - echo $GOOGLE_SERVICES_JSON | base64 --decode --ignore-garbage > ${HOME}/${CIRCLE_PROJECT_REPONAME}/mobile/google-services.json
 
 test:
   override:
