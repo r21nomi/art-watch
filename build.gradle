@@ -1,21 +1,4 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
-        classpath 'com.google.gms:google-services:3.0.0'
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
-
 ext {
     APPLICATION_ID = "com.nomi.artwatch"
     COMPILE_SDK_VERSION = 25
@@ -27,7 +10,6 @@ ext {
     SUPPORT_LIBRARY_VERSION = "25.3.1"
     SUPPORT_WEARABLE_VERSION = "2.0.1"
     PLAY_SERVICES_VERSION = "10.2.1"
-    KOTLIN_VERSION = '1.1.1'
 
     signingConfigs = {
         release {
@@ -41,6 +23,25 @@ ext {
     dexOptions = {
         jumboMode true
         maxProcessCount 4
+    }
+}
+
+buildscript {
+    ext.KOTLIN_VERSION = '1.1.2-3'
+
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.google.gms:google-services:3.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
     }
 }
 
