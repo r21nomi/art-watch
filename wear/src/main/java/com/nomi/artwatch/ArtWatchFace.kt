@@ -37,6 +37,12 @@ import java.util.concurrent.TimeUnit
 
 class ArtWatchFace : CanvasWatchFaceService() {
 
+    companion object {
+        private val GIF_ANIMATE_DURATION: Long = 100
+        private val HIDE_GIF_IMAGE_TIMER_MS = TimeUnit.SECONDS.toMillis(30).toInt()
+        private val COLON_STRING = " : "
+    }
+
     override fun onCreateEngine(): CanvasWatchFaceService.Engine {
         return Engine()
     }
@@ -76,14 +82,17 @@ class ArtWatchFace : CanvasWatchFaceService() {
 
         private val mGifAnimateRunnable = {
             invalidate()
-            startGifAnimateTimer()
+
+            if (!mIsSleeping) {
+                startGifAnimateTimer()
+            }
         }
 
         private val mDataListener = object : DataApi.DataListener {
             /**
              * Called when the gif on the phone was selected.
              * Receive gif data as Asset.
-
+             *
              * TODO：To be fixed cause it takes too long time to receiver the gif data successfully.
              */
             override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -98,7 +107,7 @@ class ArtWatchFace : CanvasWatchFaceService() {
                             val dataMapItem = DataMapItem.fromDataItem(event.dataItem)
                             val dataMap = dataMapItem.dataMap
                             applyTimeoutDataMap(dataMap)
-                            Log.d(this.javaClass.canonicalName, "Timeout : " + mTimeout)
+                            Log.d(this.javaClass.canonicalName, "Timeout : $mTimeout")
                         }
                     }
                 }
@@ -110,7 +119,7 @@ class ArtWatchFace : CanvasWatchFaceService() {
 
             mIsRound = insets.isRound
 
-            Log.d(this.javaClass.canonicalName, "isRound : " + mIsRound)
+            Log.d(this.javaClass.canonicalName, "isRound : $mIsRound")
         }
 
         private val mGoogleConnectionCallback = object : GoogleApiClient.ConnectionCallbacks {
@@ -188,6 +197,9 @@ class ArtWatchFace : CanvasWatchFaceService() {
             }
         }
 
+        /**
+         * This method should only be called every onTimeTick() in ambient mode to save battery life.
+         */
         override fun onDraw(canvas: Canvas?, bounds: Rect?) {
             Log.v(this.javaClass.canonicalName, "onDraw")
 
@@ -367,7 +379,7 @@ class ArtWatchFace : CanvasWatchFaceService() {
                         .load(toByteArray(inputStream))
                         .asGif()
                         .into(object : SimpleTarget<GifDrawable>() {
-                            override fun onResourceReady(resource: com.bumptech.glide.load.resource.gif.GifDrawable,
+                            override fun onResourceReady(resource: GifDrawable,
                                                          glideAnimation: GlideAnimation<in GifDrawable>) {
                                 mGifResource = resource
                                 if (mGifImageView.visibility == View.GONE) {
@@ -378,8 +390,8 @@ class ArtWatchFace : CanvasWatchFaceService() {
                                 startGifAnimate()
                             }
 
-                            override fun onLoadFailed(e: Exception?, errorDrawable: Drawable?) {
-                                Log.e(this.javaClass.canonicalName, e!!.localizedMessage)
+                            override fun onLoadFailed(e: Exception, errorDrawable: Drawable?) {
+                                Log.e(this.javaClass.canonicalName, e.localizedMessage)
                             }
                         })
             } catch (e: IOException) {
@@ -422,10 +434,11 @@ class ArtWatchFace : CanvasWatchFaceService() {
         }
 
         private fun stopGifAnimate() {
+            mIsSleeping = true
+            stopSleepTimer()
+
             mGifResource?.let { giResource ->
-                mIsSleeping = true
                 giResource.stop()
-                stopSleepTimer()
                 stopGifAnimateTimer()
             }
         }
@@ -434,57 +447,61 @@ class ArtWatchFace : CanvasWatchFaceService() {
             mGifImageView.visibility = View.VISIBLE
             mGifImageView.background = mGifResource
 
-            val animator = ValueAnimator.ofInt(0, 255).setDuration(300)
-            animator.addUpdateListener { animation ->
-                val num = animation.animatedValue as Int
-                mGifImageView.imageAlpha = num
-            }
-            animator.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    super.onAnimationEnd(animation)
+            ValueAnimator.ofInt(0, 255).run {
+                duration = 300
+                addUpdateListener { animation ->
+                    val num = animation.animatedValue as Int
+                    mGifImageView.imageAlpha = num
                 }
-            })
-            animator.start()
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        super.onAnimationEnd(animation)
+                    }
+                })
+                start()
+            }
         }
 
         private fun hideGifImage() {
-            val animator = ValueAnimator.ofInt(255, 0).setDuration(300)
-            animator.addUpdateListener { animation ->
-                val num = animation.animatedValue as Int
-                // TODO：To be faded out because it's not faded out now.
-                mGifImageView.imageAlpha = num
-            }
-            animator.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    super.onAnimationEnd(animation)
-                    // GifImageView is not hidden by setVisibility...
-                    mGifImageView.visibility = View.GONE
-                    // Change background image to hide GifImageView.
-                    mGifImageView.background = ColorDrawable(ContextCompat.getColor(applicationContext, R.color.black))
-                    // Apply changes.
-                    //                    invalidate();
-                    Log.d(this.javaClass.canonicalName, " Gif image has been hidden.")
+            ValueAnimator.ofInt(255, 0).run {
+                duration = 300
+                addUpdateListener { animation ->
+                    val num = animation.animatedValue as Int
+                    // TODO：To be faded out because it's not faded out now.
+                    mGifImageView.imageAlpha = num
                 }
-            })
-            animator.start()
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        super.onAnimationEnd(animation)
+                        // GifImageView is not hidden by setVisibility...
+                        mGifImageView.visibility = View.GONE
+                        // Change background image to hide GifImageView.
+                        mGifImageView.background = ColorDrawable(ContextCompat.getColor(applicationContext, R.color.black))
+                        // Apply changes.
+                        //                    invalidate();
+                        Log.d(this.javaClass.canonicalName, " Gif image has been hidden.")
+                    }
+                })
+                start()
+            }
         }
 
         private fun setMarginToTimeView() {
-            val leftRes: Int
-
-            if (mIsRound) {
-                leftRes = R.dimen.time_x_round
+            val leftRes: Int = if (mIsRound) {
+                R.dimen.time_x_round
             } else {
-                leftRes = R.dimen.time_x
+                R.dimen.time_x
             }
 
-            val layoutParams = mTimeView.layoutParams as ViewGroup.MarginLayoutParams
-            layoutParams.setMargins(
-                    resources.getDimensionPixelSize(leftRes),
-                    resources.getDimensionPixelSize(R.dimen.time_y),
-                    0,
-                    0
-            )
+            val layoutParams = (mTimeView.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                setMargins(
+                        resources.getDimensionPixelSize(leftRes),
+                        resources.getDimensionPixelSize(R.dimen.time_y),
+                        0,
+                        0
+                )
+            }
+
             mTimeView.layoutParams = layoutParams
         }
 
@@ -515,12 +532,5 @@ class ArtWatchFace : CanvasWatchFaceService() {
         private fun stopGifAnimateTimer() {
             mGifAnimateHandler.removeCallbacks(mGifAnimateRunnable)
         }
-    }
-
-    companion object {
-
-        private val GIF_ANIMATE_DURATION: Long = 100
-        private val HIDE_GIF_IMAGE_TIMER_MS = TimeUnit.SECONDS.toMillis(30).toInt()
-        private val COLON_STRING = " : "
     }
 }
